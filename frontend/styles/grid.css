@@ -1,0 +1,7 @@
+#task-table{
+    display: grid;
+    grid-template-columns: 30% 65%;
+    align-items: center;
+    grid-row-gap: 8px;
+    grid-column-gap: 12px;
+}
