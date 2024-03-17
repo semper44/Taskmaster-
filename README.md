@@ -9,8 +9,7 @@ This document serves as comprehensive documentation for the project Taskmaster, 
 
 - Installation  
 - Frontend Implementation
-- Backend Configuration
-- Models
+- Backend Setup
 - API Endpoints
 - Project Filtering and Search Feature
 - Integration with AJAX
@@ -25,6 +24,9 @@ To set up the project locally, follow these steps:
 5. Start the development server with `python manage.py runserver`.
 6. install the needed frontend node_modules by running npm install.
 7. make sure the package.json files are present.
-8. 
-  
+
+# Frontend setup  
+once npm install is successful, you can run your html through any means possible  
+# Backend setup
+
   
