@@ -1,5 +1,7 @@
 from django.db import models
 from django.db import models, transaction
+from cloudinary.models import CloudinaryField
+
 
 # Create your models here.
 
@@ -19,7 +21,7 @@ class Tasks(models.Model):
     status =models.CharField(max_length = 100, default = "Started", choices = STATUS_CHOICES)
     contributors =models.TextField(max_length = 100)
     tasks_number = models.IntegerField()
-    image = models.ImageField(upload_to=upload_to, default='/tasks/cover.jpg')
+    image = models.CloudinaryField('images', default='c40te5wgb08lfd5em1pq')
 
     def __str__(self):
         return self.name

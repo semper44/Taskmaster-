@@ -14,7 +14,9 @@ from pathlib import Path
 import os
 import dj_database_url
 import environ
-
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 env= environ.Env()
 environ.Env.read_env()
@@ -161,3 +163,9 @@ if RENDER_EXTERNAL_HOSTNAME:
     SECURE_HSTS_INCLUDE_SUBDOMAINS =True
     SECURE_HSTS_PRELOAD =True
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+cloudinary.config( 
+  	cloud_name ='dboagqxsq',
+  	api_key =725341687541998,
+  	api_secret ='mECBTg47TvbhaXePH3Gb4Z78hzg'
+)
