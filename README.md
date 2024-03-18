@@ -11,8 +11,6 @@ This document serves as comprehensive documentation for the project Taskmaster, 
 - Frontend Implementation
 - Backend Setup
 - API Endpoints
-- Project Filtering and Search Feature
-- Integration with AJAX
 - Testing
 # installation  
 To set up the project locally, follow these steps:  
@@ -28,5 +26,22 @@ To set up the project locally, follow these steps:
 # Frontend setup  
 once npm install is successful, you can run your html through any means possible  
 # Backend setup
+once `python manage.py runserver` is running successfully, you are good to go.  
+**API Endpoints**  
+The following API endpoints are available for managing tasks:  
+    - POST /tasks/create/: Create a new task.
+    - GET /tasks/list/: List all tasks.
+    - DELETE /tasks/delete/<name>/: Delete a task by name.
+    - PUT /tasks/update/<pk>/: Update a task by primary key.    
+    
+| Endpoint                   | Method | Description                       |Requirements|
+|----------------------------|--------|-----------------------------------|------------|
+| `/tasks/create/`          | POST   | Create a new task.               |name, contributors, expires, image|
+| `/tasks/list/`            | GET    | List all tasks.                  |
+| `/tasks/delete/<name>/`   | DELETE | Delete a task by name.           |
+| `/tasks/update/<name>/`   | PATCH    | Update a task by primary key.  |name, contributors, expires, image|  
+| `/finish-tasks/<name>/`   | POST   | Sets a task to completed.      |name, contributors, expires, image|
+| `/search/`                | GET    | Searches the database based on any keywords/fields.|name, contributors, expires, image|
+
 
   
