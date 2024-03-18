@@ -142,7 +142,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS= True
 
-print(env('HOST'))
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -156,12 +155,9 @@ if RENDER_EXTERNAL_HOSTNAME:
     DATABASE_URL= env('HOST')
     DATABASES = {'default':dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
 else:
-    DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+    DATABASE_URL= env('HOST')
+    DATABASES = {'default':dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+
 
 
 
