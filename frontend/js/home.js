@@ -3,6 +3,8 @@ $(document).ready(function() {
     let updateModal =$('#update-modal')
     let images = ["../images/15_Q0rCeTd.jpg", "../images/768.png", "../images/cover.jpg", "../images/IMG_nMnY6QO.jpg", "../images/R_1.jpg", "../images/wp.jpg"]
     let centralData;
+    let globalTr;
+    let globalClickedTaskOptions;
     let globalName;
     let secondTbody = $("#search-and-filter-tbody")
     let firstTbody = $('#first-tbody')
@@ -43,7 +45,7 @@ $(document).ready(function() {
         // Create and append td for the first column
         let td1 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
         let div1 = $('<div>').addClass('flex items-center gap-3');
-        div1.append($('<img>').attr('src', item.image).attr('alt', item.name).addClass('w-[20px] h-[20px] rounded-full'));
+        div1.append($('<img>').attr('src', item.image).attr('alt', item.name).addClass('first-img fw-[20px] h-[20px] rounded-full'));
         let leftDiv = $('<div>').addClass('left');
         leftDiv.append($('<p>').addClass('table-name text-base font-bold').text(item.name));
         leftDiv.append($('<div>').addClass('date text-gray-400 text-sm').text('Oct 11, 2021'));
@@ -53,25 +55,33 @@ $(document).ready(function() {
 
         // Creating and append td for the second column
         console.log(dateDue);
-        let td2 = $('<td>').addClass('w-fit px-6 py-4 whitespace-nowrap');
-        td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue));
+        let td2 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
+        td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue)).attr('content', item.expires);
         tr.append(td2);
 
         // Create and append td for the third column
-        let td3 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
+        let td3 = $('<td>').addClass('px-6 py-4 whitespace-nowrap ');
         td3.append($('<p>').addClass('font-bold').text(item.tasks_number +"/"+item.total_tasks));
         td3.append($('<p>').addClass('text-sm text-gray-400').text('Tasks'));
         tr.append(td3);
 
         // Create and append td for the fourth column
-        let td4 = $('<td>').addClass('px-6 py-4 whitespace-nowrap w-full');
+        let progress;
+        if(days < 1){
+            progress = 100
+        }else{
+            progress = days
+        }
+        let td4 = $('<td>').addClass('px-6 whitespace-nowrap');
         td4.append($('<p>').addClass('text-blue-300').text('In Progress'));
-        let progressBarDiv = $('<div>').addClass('w-full bg-gray-400 rounded-lg overflow-hidden');
-        progressBarDiv.append($('<div>').attr('id', 'progress-bar').addClass(bg-blue-300 h-2 w-[${5}px]));
+        let progressBarDiv = $('<div>').addClass('w-[80%] bg-gray-200 rounded-lg overflow-hidden');
+        let progressBarDivSubDiv = $('<div>').attr('id', 'progress-bar').addClass('bg-blue-300 h-2').css("width", `${progress}%`);
+        progressBarDiv.append(progressBarDivSubDiv);
+        
         td4.append(progressBarDiv);
         tr.append(td4);
         // Create and append td for the fifth column
-        let td5 = $('<td>').addClass(' px-4 py-4 whitespace-nowrap relative');
+        let td5 = $('<td>').addClass('px-6 py-4 whitespace-nowrap relative');
         let div2 = $('<div>').addClass('image-parent flex items-center');
         let strings =  item.contributors.split(",")
         div2.append($('<img>').attr('src', images[random]).attr('alt', strings[0]).addClass('first-string w-[20px] h-[20px] rounded-full'));
@@ -80,9 +90,10 @@ $(document).ready(function() {
         innerDiv.append($('<div>').addClass('flex absolute').append($('<p>').addClass('text-sm text-purple-300').text('+')).append($('<p>').addClass('text-sm text-purple-300').text('3')));
         div2.append(innerDiv);
         div2.append($('<div>').addClass('task-options').append($('<i>').addClass('fa fa-ellipsis-v ml-4 text-gray-500 text-sm cursor-pointer').attr('aria-hidden', 'true')));
-        let showOptionsDiv = $('<div>').addClass('show-options').addClass('w-[120px] hidden bg-white px-4 py-3 right-[40px] rounded-lg absolute top-0');
+        let showOptionsDiv = $('<div>').addClass('show-options').addClass('w-[120px] hidden bg-white px-4 py-3 right-[40px] rounded-lg absolute top-[40px]');
         showOptionsDiv.append($('<div>').addClass('flex gap-3 cursor-pointer mb-4').append($('<p>').addClass('text-gray-500').text('Delete').addClass('delete-task')));
-        showOptionsDiv.append($('<div>').addClass('show-update').addClass('flex gap-3 cursor-pointer').append($('<p>').addClass('text-gray-500').attr('id', 'delete-task').text('Update')));
+        showOptionsDiv.append($('<div>').addClass('show-update').addClass('flex gap-3 cursor-pointer mb-4').append($('<p>').addClass('text-gray-500').text('Update')));
+        showOptionsDiv.append($('<div>').addClass('show-finish').addClass('flex gap-3 cursor-pointer').append($('<p>').addClass('text-gray-500').text('Finish')));
         div2.append(showOptionsDiv);
         td5.append(div2);
         tr.append(td5);
@@ -137,7 +148,7 @@ $(document).ready(function() {
         let formData = new FormData();
         formData.append('name', $('#name').val());
         formData.append('contributors', $('#contributors').val());
-        formData.append('created', $('#expires').val());
+        formData.append('expires', $('#expires').val());
         formData.append('image', $('#task_id_file')[0].files[0]);
         
 
@@ -233,18 +244,29 @@ $(document).ready(function() {
             }
             });
     });
-    
 
     // to show the update modal
     $(document).on('click', ".show-update", function(){
         let clickedTaskOptions = $(this); 
+        globalClickedTaskOptions = $(this); 
         let $showOptionsDiv = clickedTaskOptions.closest('td').find('.show-options');
         $showOptionsDiv.hide()
         let name = clickedTaskOptions.closest('tr').find('.table-name').text();
+        let closestTr = $(this).closest('.table-rows');
+        let associatedImage = closestTr.find('img').attr('src');
+        let contentTd = closestTr.find('td[content]');     
+        let contentValue = contentTd.attr('content');
+        console.log('Custom attribute "content" value:', contentValue);
         let firstString = clickedTaskOptions.closest('td').find('.first-string').attr('alt');
         let secondString = clickedTaskOptions.closest('td').find('.second-string').attr('alt');
+        globalTr = $(this).closest('.table-rows');
+        
         let form = $('#updatename')
         let contributors = $('#updatecontributors')
+        let date = $('#update-expires')
+        date.val(contentValue)
+        let image = $('#update-modalpreview')
+        image.attr("src", associatedImage)
         globalName = name
         form.val(name)
         contributors.val(firstString+","+secondString)
@@ -252,21 +274,40 @@ $(document).ready(function() {
     })
 
     // updating tasks
-    $("#update-submit").on('click', function(e) {
-        
-
+    $("#update-submit").on('click', function(e) {  
+        console.log($('#update-task_id_file')[0].files[0]);
         let name = $('#updatename').val()
         e.preventDefault();  
-        let formData = {
-        name: name,
-        contributors: $('#updatecontributors').val()
-        };
+        let formData = new FormData();
+    
+        if( $('#updatename').val() !== ""){
+            formData.append('name', $('#updatename').val());
+        }
+        if( $('#updatecontributors').val() !== ""){
+            formData.append('contributors', $('#updatecontributors').val());
+        }
+        if( $('#update-expires').val() !== ""){
+            formData.append('expires', $('#update-expires').val());
+        }
+        if($('#update-task_id_file')[0].files[0]){
+            formData.append('image', $('#update-task_id_file')[0].files[0]);
+        }
+        
         $.ajax({
             url: `http://127.0.0.1:8000/tasks/update/${globalName}/`,
             method: 'PATCH',
             data:formData,
-            dataType: 'json',
+            processData: false, 
+            contentType: false,
             success: function(response) {
+                console.log(response);
+                globalTr.find('.first-img').attr('src', response.image)
+                let contentTd = globalTr.find('td[content]');     
+                contentTd.attr('content', response.expires);
+                let strings =  response.contributors.split(",")
+                globalClickedTaskOptions.closest('tr').find('.table-name').text(response.name)
+                globalClickedTaskOptions.closest('td').find('.first-string').attr('alt', strings[0]);
+                globalClickedTaskOptions.closest('td').find('.second-string').attr('alt', strings[1]);
                 updateModal.hide()
                 Toastify({
                     text: "Update successfull",
@@ -341,13 +382,12 @@ $(document).ready(function() {
     let baseTypingTimer;
     // Function to perform the AJAX request
     function search(query) {
-        // Construct the URL with the query parameter
         const url = 'http://127.0.0.1:8000/tasks/search/?q=' + query;
 
         // Clear previous timeouts
         clearTimeout(baseTypingTimer);
 
-        // Set a new timeout
+        // Setting a new timeout
         baseTypingTimer = setTimeout(function() {
             firstTbody.hide()
             secondTbody.hide()
@@ -377,7 +417,7 @@ $(document).ready(function() {
                     console.error('Request failed:', textStatus, errorThrown);
                 }
             });
-        }, 500); // Set timeout to 500 milliseconds
+        }, 500);
     }
 
     $("#input-search").on('input', function() {
@@ -386,29 +426,39 @@ $(document).ready(function() {
     });
 
     const taskCreateparentmodalpreview = $("#parentmodalpreview")
-    const taskfileinputcontainer = $(".task-file-input-container")
+    const updateCreateparentmodalpreview = $("#update-parentmodalpreview")
+
+    const updateTaskfileinputcontainer = $(".update-task-file-input-container")
+    const taskfileinputcontainer= $(".task-file-input-container")
+
     const taskCreatemodalpreview = $("#modalpreview")
+    const updatemodalpreview = $("#update-modalpreview")
+
+    // preview buttons
     const uploadsubmitButton = $("#uploadsubmitButton")
     const uploadCancelButton = $("#uploadcancelButton")
-    const uploadpreview = $("#uploadPreview")
-    const modalpreviewCancel = $("#task-preview-cancel")
+    const generalpreview = $("#uploadPreview")
     const uploadpreviewImage = $("#uploadPreviewImage")
-    const taskUploadImage = $("#task_id_file")
 
-    function previewFn(e, uploadpreviewImage, modalpreviewCancel, uploadPreview, uploadCancelButton, uploadsubmitButton, taskCreatemodalpreview, taskfileinputcontainer, taskCreateparentmodalpreview){
+
+    const modalpreviewCancel = $("#task-preview-cancel")
+    const updateModalpreviewCancel = $("#update-task-preview-cancel")
+    // const taskUploadImage = $("#task_id_file")
+    // const updateTaskUploadImage = $("#update-task_id_file")
+
+    function previewFn(e, parentModal, uploadpreviewImage, modalpreviewCancel, uploadPreview, uploadCancelButton, uploadsubmitButton, modalpreview, taskfileinputcontainer, parentmodalpreview){
         const reader = new FileReader();
         let selectedFile = e.target.files[0];
         // console.log($(this))
         // console.log($(this)[0])
         // console.log($(this).closest('body').find('#create-modal'));
         // console.log($(this).closest('#task_id_file').closest("#create-modal")[0]);
-        let parent = $('#create-modal');
     
         if (selectedFile) {
             reader.onload = function (e) {
                 $(uploadpreviewImage).attr('src', e.target.result);
                 $(uploadPreview).css('display', 'block');
-                $(parent).css('display', 'none');
+                $(parentModal).css('display', 'none');
             };
             reader.readAsDataURL(selectedFile);
         }
@@ -416,9 +466,12 @@ $(document).ready(function() {
         $(uploadCancelButton).click(function (e) {
             $(uploadpreviewImage).val("");
             $(uploadPreview).css('display', 'none');
+            $(parentModal).css('display', 'block');
+
         });
     
         $(modalpreviewCancel).click(function (e) {
+            alert("clicked")
             $(modalpreview).val("");
             $(parentmodalpreview).css('display', 'none');
             $(taskfileinputcontainer).css('display', 'block');
@@ -426,7 +479,7 @@ $(document).ready(function() {
     
         $(uploadsubmitButton).click(function (e) {
             $(uploadPreview).css('display', 'none');
-            $(parent).css('display', 'block');
+            $(parentModal).css('display', 'block');
             $(modalpreview).css('display', 'block');
             const selectedFileUrl = URL.createObjectURL(selectedFile);
             $(taskfileinputcontainer).css({'display':'flex', "align-items":"center"});
@@ -438,9 +491,57 @@ $(document).ready(function() {
     }
     
     $("#task_id_file").on("change", (e)=>{
-        previewFn(e, uploadpreviewImage, modalpreviewCancel, uploadPreview, uploadCancelButton, uploadsubmitButton, taskCreatemodalpreview, taskfileinputcontainer, taskCreateparentmodalpreview)    
+        previewFn(e, createModal, uploadpreviewImage, modalpreviewCancel, generalpreview, uploadCancelButton, uploadsubmitButton, taskCreatemodalpreview, taskfileinputcontainer, taskCreateparentmodalpreview)    
     })
 
+    $("#update-task_id_file").on("change", (e)=>{
+        previewFn(e, updateModal, uploadpreviewImage, updateModalpreviewCancel, generalpreview, uploadCancelButton, uploadsubmitButton, updatemodalpreview, updateTaskfileinputcontainer, updateCreateparentmodalpreview)    
+    })
+
+
+    $(document).on('click', ".show-finish", function(){
+        let name = $(this).closest('tr').find('.table-name').text();
+        console.log( $(this).closest('tr'));
+        let $showOptionsDiv = $(this).closest('td').find('.show-options');
+        $showOptionsDiv.hide()
+        
+        $.ajax({
+            url: `http://127.0.0.1:8000/tasks/finish-tasks/${name}/`,
+            method: 'PATCH',
+            dataType: 'json',
+            success: function(response) {
+                Toastify({
+                    text: "Task marked as finished",
+                    duration: 3000,
+                    newWindow: true,
+                    gravity: "top", 
+                    position: "right", 
+                    stopOnFocus: true, 
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                    // onClick: function(){} // Callback after click
+                }).showToast();
+                
+            },
+            error: function(xhr, status, error) {
+                let errorMessage = xhr.responseJSON.error || "An error occurred.";
+                Toastify({
+                    text: errorMessage,
+                    duration: 3000,
+                    newWindow: true,
+                    gravity: "top", 
+                    position: "right", 
+                    stopOnFocus: true, 
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                }).showToast();
+            }
+            });
+    })
+
+    $("#loading").hide()
 });
 
 

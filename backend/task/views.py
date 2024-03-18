@@ -64,12 +64,14 @@ class TaskDeleteView(TaskQuerysetMixin, generics.DestroyAPIView):
 
 class TaskUpdateView(TaskQuerysetMixin, generics.UpdateAPIView):
     serializer_class = Taskapi
+    parser_classes = [MultiPartParser] 
 
     def update(self, request, *args, **kwargs):
         name = self.kwargs.get('name')  # Get the 'pk' captured from URL
         try:
             instance = self.get_queryset().get(name=name)
             print(instance, "first")
+            print(request.data, "second")
             serializer = self.get_serializer(instance, data=request.data, partial=True, context={'request':request})
             print(serializer.error_messages, "second")
             print(request.data, "third")
@@ -78,7 +80,6 @@ class TaskUpdateView(TaskQuerysetMixin, generics.UpdateAPIView):
             return Response(serializer.data)
         except Tasks.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
 
 
 class TaskSearchView(TaskQuerysetMixin,generics.ListAPIView):
@@ -107,4 +108,26 @@ class TaskSearchView(TaskQuerysetMixin,generics.ListAPIView):
 
             
         return queryset 
+
+
+class TaskFinish(TaskQuerysetMixin, generics.UpdateAPIView):
+    serializer_class = Taskapi
+
+    def update(self, request, *args, **kwargs):
+        name = self.kwargs.get('name')  # Get the 'pk' captured from URL
+        try:
+            instance = self.get_queryset().get(name=name)
+            if instance.status == "Started":
+                instance.status = "Finished"
+                instance.save(update_fields=["status"]) 
+                return Response({}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Task is not in 'Started' status, It cannot be finished"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        except Tasks.DoesNotExist:
+            return Response({"error": "Task not found."},
+                            status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 

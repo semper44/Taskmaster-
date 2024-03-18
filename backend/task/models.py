@@ -14,8 +14,8 @@ STATUS_CHOICES = (
 
 class Tasks(models.Model):
     name =models.CharField(max_length = 100, unique= True)
-    expires =models.DateTimeField(auto_now_add = True)
-    created =models.DateTimeField()
+    expires =models.DateTimeField()
+    created =models.DateTimeField(auto_now_add = True)
     status =models.CharField(max_length = 100, default = "Started", choices = STATUS_CHOICES)
     contributors =models.TextField(max_length = 100)
     tasks_number = models.IntegerField()
@@ -23,3 +23,5 @@ class Tasks(models.Model):
 
     def __str__(self):
         return self.name
+    
+    
