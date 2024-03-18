@@ -15,6 +15,9 @@ import os
 import dj_database_url
 import environ
 
+
+env= environ.Env()
+environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,11 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u*(g5d3h^l)c%fbx_(slf4wg@tcmhzwp=cqu94w&l1ct3&k@_s'
+SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['http://127.0.0.1:5500', '127.0.0.1']
 
@@ -146,3 +150,12 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5500',
 ]
 
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    SESSION_COOKIE_SECURE= True
+    CSRF_COOKIE_SECURE=True
+    SECURE_HSTS_SECONDS=3600
+    SECURE_SSL_REDIRECT=True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS =True
+    SECURE_HSTS_PRELOAD =True
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
