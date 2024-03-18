@@ -11,6 +11,7 @@ This document serves as comprehensive documentation for the project Taskmaster, 
 - Frontend Implementation
 - Backend Setup
 - API Endpoints
+- Navigation around the page
 - Testing
 # installation  
 To set up the project locally, follow these steps:  
@@ -42,6 +43,12 @@ The following API endpoints are available for managing tasks:
 | `/tasks/update/<name>/`   | PATCH    | Update a task by primary key.  |name, contributors, expires, image|  
 | `/finish-tasks/<name>/`   | POST   | Sets a task to completed.      |name, contributors, expires, image|
 | `/search/`                | GET    | Searches the database based on any keywords/fields.|name, contributors, expires, image|
+
+**Navigation around the page**  
+From top to bottom, the search bar is for searching, the add icon at th extreme end is for adding tasks.  
+The `All` box is for filtering between different status of the task.  
+The back arrow before `17 found` is for navigating back from the search and filtered tasks to the whole tasks  
+The three dots that looks like semicolon is used for editing. There you can delete, update or finish a task.
 
 
   
