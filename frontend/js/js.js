@@ -1,19 +1,18 @@
 $(document).ready(function() {
     let createModal =$('#create-modal')
     let updateModal =$('#update-modal')
-    let images = ["images/15_Q0rCeTd.jpg", "images/768.png", "images/cover.jpg", "images/IMG_nMnY6QO.jpg", "images/R_1.jpg", "images/wp.jpg"]
+    let images = ["../images/15_Q0rCeTd.jpg", "../images/768.png", "../images/cover.jpg", "../images/IMG_nMnY6QO.jpg", "../images/R_1.jpg", "../images/wp.jpg"]
     let centralData;
     let globalTr;
     let globalClickedTaskOptions;
     let globalName;
-    let globalRowNumber;
     let secondTbody = $("#search-and-filter-tbody")
     let firstTbody = $('#first-tbody')
     let searchResultsOnly = $('.search-body-only ')
     let p = $("<p>").addClass("font-xl text-red-600 text-center mt-8").text("Nothing found")
 
 
-    function createANewTableRow(item, index, element){
+    function createANewTableRow(item, element){
         let store = []
         const createdDate = new Date(item.created);
         const expiresDate = new Date(item.expires);
@@ -41,8 +40,7 @@ $(document).ready(function() {
         let random = Math.floor(Math.random()* images.length)
         let random2 = Math.floor(Math.random()* images.length)
         
-        // table row
-        let tr = $('<tr>').addClass('table-rows shadow-md my-3 rounded-lg relative');
+        let tr = $('<tr>').addClass('table-rows shadow-md my-3 rounded-lg');
     
         // Create and append td for the first column
         let td1 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
@@ -59,10 +57,6 @@ $(document).ready(function() {
         console.log(dateDue);
         let td2 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
         td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue)).attr('content', item.expires);
-        // adding numbers for easy updating of centraldata
-        let tableNumber = $('<div>').addClass('hidden');
-        tableNumber.attr('data', index)
-        td2.append(tableNumber)
         tr.append(td2);
 
         // Create and append td for the third column
@@ -86,9 +80,8 @@ $(document).ready(function() {
         
         td4.append(progressBarDiv);
         tr.append(td4);
-
         // Create and append td for the fifth column
-        let td5 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
+        let td5 = $('<td>').addClass('px-6 py-4 whitespace-nowrap relative');
         let div2 = $('<div>').addClass('image-parent flex items-center');
         let strings =  item.contributors.split(",")
         div2.append($('<img>').attr('src', images[random]).attr('alt', strings[0]).addClass('first-string w-[20px] h-[20px] rounded-full'));
@@ -97,13 +90,12 @@ $(document).ready(function() {
         innerDiv.append($('<div>').addClass('flex absolute').append($('<p>').addClass('text-sm text-purple-300').text('+')).append($('<p>').addClass('text-sm text-purple-300').text('3')));
         div2.append(innerDiv);
         div2.append($('<div>').addClass('task-options').append($('<i>').addClass('fa fa-ellipsis-v ml-4 text-gray-500 text-sm cursor-pointer').attr('aria-hidden', 'true')));
-        let showOptionsDiv = $('<div>').addClass('show-options').addClass('w-[120px] hidden bg-white px-4 py-3 right-[40px] rounded-lg absolute top-[40px] z-50');
+        let showOptionsDiv = $('<div>').addClass('show-options').addClass('w-[120px] hidden bg-white px-4 py-3 right-[40px] rounded-lg absolute top-[40px]');
         showOptionsDiv.append($('<div>').addClass('flex gap-3 cursor-pointer mb-4').append($('<p>').addClass('text-gray-500').text('Delete').addClass('delete-task')));
         showOptionsDiv.append($('<div>').addClass('show-update').addClass('flex gap-3 cursor-pointer mb-4').append($('<p>').addClass('text-gray-500').text('Update')));
         showOptionsDiv.append($('<div>').addClass('show-finish').addClass('flex gap-3 cursor-pointer').append($('<p>').addClass('text-gray-500').text('Finish')));
-        // div2.append(showOptionsDiv);
+        div2.append(showOptionsDiv);
         td5.append(div2);
-        td5.append(showOptionsDiv);
         tr.append(td5);
 
         // Append the created row to the table body
@@ -111,7 +103,6 @@ $(document).ready(function() {
         element.append(tr);
     }
 
-    // show create task modal
     $('#create-task').on('click',function(){
         createModal.show()
     })
@@ -121,7 +112,6 @@ $(document).ready(function() {
         $('#filter-options').toggle()
     })
 
-    // hide create task modal
     $('#button-close').on('click',function(){
         createModal.hide()
     })
@@ -137,27 +127,23 @@ $(document).ready(function() {
         method: 'GET',
         dataType: 'json',
         success: function(response) {
-            console.log(response, 'ooo');
+            console.log(response);
             centralData = response
             // Iterate over each item in the response
             $.each(response, function(index, item) {
-                createANewTableRow(item, index, firstTbody)
+                createANewTableRow(item, firstTbody)
             
             });
-            // $("#loading").hide()
         },
         error: function(xhr, status, error) {
             console.error('Error fetching data:', error);
-            $("#loading").hide()
         }
-        
     });
     
     
 
     // submit form
     $('#create-submit').click(function (e) {
-        $("#loadingmodal").show()
         e.preventDefault();
         let formData = new FormData();
         formData.append('name', $('#name').val());
@@ -174,9 +160,8 @@ $(document).ready(function() {
             data: formData,
             success: function (response) {
                 console.log(response);
-                centralData.push(response)
                 createModal.hide();
-                createANewTableRow(response, index=0, firstTbody);
+                createANewTableRow(response, firstTbody);
                 Toastify({
                     text: "Task created",
                     duration: 3000,
@@ -188,32 +173,23 @@ $(document).ready(function() {
                         background: "linear-gradient(to right, #00b09b, #96c93d)",
                     },
                 }).showToast();
-                $("#loadingmodal").hide()
+
             },
             error: function (xhr, status, error) {
-                console.log(xhr.responseJSON); // Log the error response for debugging
-    
-                let errorMessages = xhr.responseJSON; // Capture error messages
-    
-                // Display each error message dynamically
-                for (const [field, message] of Object.entries(errorMessages)) {
-                    Toastify({
-                        text: `${field}: ${message}`,
-                        duration: 5000,
-                        newWindow: true,
-                        gravity: "top",
-                        position: "right",
-                        stopOnFocus: true,
-                        style: {
-                            background: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red gradient for errors
-                        },
-                    }).showToast();
-                }
-    
-                $("#loadingmodal").hide()
-            },
+                console.log(error);
+                Toastify({
+                    text: error,
+                    duration: 3000,
+                    newWindow: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                }).showToast();
+            }
         });
-        
     });
     
 
@@ -226,7 +202,6 @@ $(document).ready(function() {
 
     // to delete a task
     $(document).on('click', '.delete-task', function() {
-        $("#loadingmodal").show()
         let clickedTaskOptions = $(this); 
         let name = clickedTaskOptions.closest('tr').find('.table-name').text();
         let tr = clickedTaskOptions.closest('.table-rows')
@@ -252,7 +227,6 @@ $(document).ready(function() {
                     },
                     // onClick: function(){} // Callback after click
                 }).showToast();
-                $("#loadingmodal").hide()
                 
             },
             error: function(xhr, status, error) {
@@ -264,18 +238,16 @@ $(document).ready(function() {
                     position: "right", 
                     stopOnFocus: true, 
                     style: {
-                        background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
                     },
                 }).showToast();
-                $("#loadingmodal").hide()
             }
             });
     });
 
     // to show the update modal
     $(document).on('click', ".show-update", function(){
-        let clickedTaskOptions = $(this);
-        console.log($(this), 'this'); 
+        let clickedTaskOptions = $(this); 
         globalClickedTaskOptions = $(this); 
         let $showOptionsDiv = clickedTaskOptions.closest('td').find('.show-options');
         $showOptionsDiv.hide()
@@ -284,8 +256,7 @@ $(document).ready(function() {
         let associatedImage = closestTr.find('img').attr('src');
         let contentTd = closestTr.find('td[content]');     
         let contentValue = contentTd.attr('content');
-        let contentNumber = contentTd.find('div[data]');
-        globalRowNumber = contentNumber.attr('data')
+        console.log('Custom attribute "content" value:', contentValue);
         let firstString = clickedTaskOptions.closest('td').find('.first-string').attr('alt');
         let secondString = clickedTaskOptions.closest('td').find('.second-string').attr('alt');
         globalTr = $(this).closest('.table-rows');
@@ -293,144 +264,87 @@ $(document).ready(function() {
         let form = $('#updatename')
         let contributors = $('#updatecontributors')
         let date = $('#update-expires')
-        const dateValue = new Date(contentValue).toISOString().split('T')[0];
-        date.val(dateValue)
+        date.val(contentValue)
         let image = $('#update-modalpreview')
         image.attr("src", associatedImage)
         globalName = name
         form.val(name)
         contributors.val(firstString+","+secondString)
-
-
         updateModal.show()
     })
 
     // updating tasks
-    $("#update-submit").on('click', async function (e) {
+    $("#update-submit").on('click', function(e) {  
         console.log($('#update-task_id_file')[0].files[0]);
-        
-        $("#loadingmodal").show();
-        e.preventDefault();
-    
+        let name = $('#updatename').val()
+        e.preventDefault();  
         let formData = new FormData();
-
-         // Checking if a new file is selected
-        if ($('#update-task_id_file')[0].files[0]) {
-            formData.append('image', $('#update-task_id_file')[0].files[0]);
-        } else {
-            // If no file is selected, i fetch the image from the `src` attribute
-            const imageSrc = $('#update-modalpreview').attr('src');
-            if (imageSrc && imageSrc !== '#') {
-                try {
-                    // Fetch the image and convert it to a Blob
-                    const response = await fetch(imageSrc);
-                    const blob = await response.blob();
     
-                    // Create a File object from the Blob
-                    const duplicatedImage = new File([blob], "duplicated_image.jpg", { type: blob.type });
-    
-                    // Append the duplicated image to FormData
-                    formData.append('image', duplicatedImage);
-                } catch (error) {
-                    console.error("Failed to duplicate the image:", error);
-                    Toastify({
-                        text: "Error duplicating image",
-                        duration: 3000,
-                        gravity: "top",
-                        position: "right",
-                        style: {
-                            background: "linear-gradient(to right, #ff5f6d, #ffc371)",
-                        },
-                    }).showToast();
-                    $("#loadingmodal").hide();
-                    return; // Stop further processing if image duplication fails
-                }
-            }
-        }
-    
-        // Append fields if they are not empty
-        if ($('#updatename').val() !== "") {
+        if( $('#updatename').val() !== ""){
             formData.append('name', $('#updatename').val());
         }
-        if ($('#updatecontributors').val() !== "") {
+        if( $('#updatecontributors').val() !== ""){
             formData.append('contributors', $('#updatecontributors').val());
         }
-        if ($('#update-expires').val() !== "") {
+        if( $('#update-expires').val() !== ""){
             formData.append('expires', $('#update-expires').val());
         }
-    
-    
-        // Perform the AJAX request
+        if($('#update-task_id_file')[0].files[0]){
+            formData.append('image', $('#update-task_id_file')[0].files[0]);
+        }
+        
         $.ajax({
             url: `http://127.0.0.1:8000/tasks/update/${globalName}/`,
             method: 'PATCH',
-            data: formData,
-            processData: false,
+            data:formData,
+            processData: false, 
             contentType: false,
-            success: function (response) {
-                // console.log(response, 'ppp');
-                // console.log(centralData, 'before');
-                // centralData[globalRowNumber] = response
-                // console.log(centralData,'cc');
-                globalTr.find('.first-img').attr('src', response.image_url);
-                let contentTd = globalTr.find('td[content]');
+            success: function(response) {
+                console.log(response);
+                globalTr.find('.first-img').attr('src', response.image)
+                let contentTd = globalTr.find('td[content]');     
                 contentTd.attr('content', response.expires);
-                let strings = response.contributors.split(",");
-                globalClickedTaskOptions.closest('tr').find('.table-name').text(response.name);
+                let strings =  response.contributors.split(",")
+                globalClickedTaskOptions.closest('tr').find('.table-name').text(response.name)
                 globalClickedTaskOptions.closest('td').find('.first-string').attr('alt', strings[0]);
                 globalClickedTaskOptions.closest('td').find('.second-string').attr('alt', strings[1]);
-                updateModal.hide();
+                updateModal.hide()
                 Toastify({
-                    text: "Update successful",
+                    text: "Update successfull",
                     duration: 3000,
                     newWindow: true,
-                    gravity: "top",
-                    position: "right",
-                    stopOnFocus: true,
+                    gravity: "top", 
+                    position: "right", 
+                    stopOnFocus: true, 
                     style: {
                         background: "linear-gradient(to right, #00b09b, #96c93d)",
                     },
-                }).showToast();
-                $("#loadingmodal").hide();
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr.responseJSON); // Log the error response for debugging
-    
-                let errorMessages = xhr.responseJSON; // Capture error messages
-    
-                // Display each error message dynamically
-                for (const [field, message] of Object.entries(errorMessages)) {
-                    Toastify({
-                        text: `${field}: ${message}`,
-                        duration: 3000,
-                        newWindow: true,
-                        gravity: "top",
-                        position: "right",
-                        stopOnFocus: true,
-                        style: {
-                            background: "linear-gradient(to right, #ff5f6d, #ffc371)",
-                        },
                     }).showToast();
-                }
-                $("#loadingmodal").hide();
             },
-        });
+            error: function(xhr, status, error) {
+                console.log(error);
+                Toastify({
+                    text: error,
+                    duration: 3000,
+                    newWindow: true,
+                    gravity: "top", 
+                    position: "right", 
+                    stopOnFocus: true, 
+                    style: {
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
+                    },
+                    // onClick: function(){} // Callback after click
+                    }).showToast();
+            }
+            });
     });
     
-    // all results back
-    $('#all-back').on('click', function(){
-        firstTbody.show()
-        searchResultsOnly.hide()
-        secondTbody.hide()
-        $('.all-results').hide()
-    })
      // filtering by status
      $('#filter-options').on('click', 'p', function() {
         const clickedValue = $(this).text();
         firstTbody.hide()
         searchResultsOnly.hide()
         secondTbody.html("")
-        $('.all-results').show()
 
         
         let flag = false
@@ -440,7 +354,7 @@ $(document).ready(function() {
             console.log(clickedValue === data.status);
             if(data.status ===clickedValue ){
                 flag = true
-                createANewTableRow(data, index=0, secondTbody)
+                createANewTableRow(data, secondTbody)
                 console.log("ran");
             }
         }
@@ -460,7 +374,6 @@ $(document).ready(function() {
     // hiding search and filter results
     $('#back').on('click',function(){
         secondTbody.hide()
-        $(".results").hide()
         searchResultsOnly.hide()
         firstTbody.show()
     })
@@ -487,15 +400,12 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(data) {
                     secondTbody.empty(); 
-                    secondTbody.show();
-                    if(data.length > 0){
-                        $(".results").show()
-                    } 
+                    secondTbody.show(); 
                     $('#result-number').text(data.length)
                     console.log(data);
                     if (data.length >= 1) {
                         $.each(data, function(index, item) {
-                           createANewTableRow(item, index, secondTbody)
+                           createANewTableRow(item, secondTbody)
                         });
                     }else{
                         searchResultsOnly.append(p)
@@ -600,10 +510,6 @@ $(document).ready(function() {
             method: 'PATCH',
             dataType: 'json',
             success: function(response) {
-                console.log(response, 'fin');
-                console.log(centralData, 'before');
-                centralData[globalRowNumber] = response
-                console.log(centralData,'cc');
                 Toastify({
                     text: "Task marked as finished",
                     duration: 3000,
@@ -628,42 +534,12 @@ $(document).ready(function() {
                     position: "right", 
                     stopOnFocus: true, 
                     style: {
-                        background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                        background: "linear-gradient(to right, #00b09b, #96c93d)",
                     },
                 }).showToast();
             }
             });
     })
 
-
-    function generateCircles() {
-        const container = document.getElementById('shared-dom');
-        container.innerHTML = ''; // Clear existing circles
-    
-        // Get the screen width
-        const screenWidth = window.innerWidth;
-    
-        // Calculate the number of circles based on screen size
-        const circleCount = Math.floor(screenWidth / 100); // Example: 1 circle per 100px of width
-    
-        // Create the circles dynamically
-        for (let i = 0; i < circleCount; i++) {
-            const circle = document.createElement('div');
-            circle.classList.add('sub-rect');
-            container.appendChild(circle);
-        }
-    }
-    
-    // Generate circles on page load
-    generateCircles();
-    
-    // Regenerate circles on window resize
-    window.addEventListener('resize', generateCircles);
-    
-  
+    $("#loading").hide()
 });
-
-
-
-
-

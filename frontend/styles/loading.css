@@ -75,7 +75,43 @@ i {
   margin-bottom: 20px;
 }
 
+/* Container for the loading circles */
 .shared-dom {
+  display: flex; /* Use flexbox to layout the circles */
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
+  justify-content: center; /* Center the circles horizontally */
+  gap: 10px; /* Space between the circles */
+  padding: 10px; /* Optional padding around the container */
+}
+
+/* Individual circle styles */
+.sub-rect {
+  width: clamp(40px, 8vw, 80px); /* Responsive width: min 40px, max 80px */
+  height: clamp(40px, 8vw, 80px); /* Responsive height */
+  border-radius: 50%; /* Make it circular */
+  background-color: #ccc; /* Skeleton loading background color */
+  animation: pulse 1.5s infinite ease-in-out; /* Pulsing animation */
+}
+
+/* Pulsing animation for the circles */
+/* @keyframes pulse {
+  0%, 100% {
+      opacity: 0.6;
+  }
+  50% {
+      opacity: 1;
+  }
+} */
+
+/* Responsive spacing for larger screens */
+@media (min-width: 768px) {
+  .shared-dom {
+      gap: 20px; /* Increase spacing on larger screens */
+  }
+}
+
+
+/* .shared-dom {
   width: 800px;
   height: 110px;
 }
@@ -86,7 +122,7 @@ i {
   height: 70px;
   float: left;
   margin: 20px 20px 20px 0;
-}
+} */
 
 .pure-background {
   background-color: #eee;
@@ -123,3 +159,28 @@ i {
     0 180px,
     0 0;
 }
+
+.loader {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #0D131A;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  }
+
+  @keyframes rotation {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+  } 
+
+  /* #0D131A */
+  #loadingmodal-fixed{
+    z-index: 99;
+  }

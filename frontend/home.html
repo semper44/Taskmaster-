@@ -27,34 +27,37 @@
 
 <body>
     <!-- loading  -->
-    <div id="loading" class="relative hidden w-full">
+    <div id="loading" class="relative w-full">
         <div class="fixed inset-0 flex items-center justify-center z-50">
             <div class="fixed inset-0 bg-black/75"></div>
             <div id="loading" class="main-item absolute">
-                <div class="static-background">
+                <div class="static-background" style="overflow: hidden;">
                     <div class="background-masker btn-divide-left"></div>
                 </div>
 
-                <div class="animated-background">
+                <div class="animated-background" style="overflow: hidden;">
                     <div class="background-masker btn-divide-left"></div>
                 </div>
 
-                <div class="shared-dom">
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
-                    <div class="sub-rect pure-background"></div>
+                <div id="shared-dom" class="shared-dom" style="overflow: hidden;">
                 </div>
+                <div class="flex" style="gap: 9%; overflow: hidden;">
+                    <div class="css-dom"></div>
+                    <div class="css-dom" style="width: 60%;"></div>
 
-                <div class="css-dom"></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- loading spinner -->
+    <div id="loadingmodal" class="relative w-full hidden">
+        <div id="loadingmodal-fixed" class="fixed inset-0 flex items-center justify-center">
+            <div class="fixed inset-0 bg-transparent"></div>
+            <span class="loader"></span>
+            </div>
+    </div>
+    
 
     <!-- preview upload -->
     <div id="uploadPreview" class=" hidden w-full">
@@ -74,21 +77,19 @@
 
 
     <!-- create modal -->
-    <div id="create-modal" class="relative hidden w-full">
+    <div id="create-modal" class="relative w-full hidden">
         <div class="fixed inset-0 flex items-center justify-center z-50">
-            <div class="fixed inset-0 bg-black/75"></div>
+            <div class="fixed inset-0 bg-black/75 z-40"></div>
             <div
                 class="bg-white dark:bg-base-darkbgvariant w-[80%] md:w-[40%] px-3 pt-8 rounded-lg z-50 absolute grid gap-y-3">
                 <div>
                     <input id="name" type="text" placeholder="Name" class="pl-4 rounded-xl h-[35px] w-full border ">
                 </div>
                 <div>
-                    <input id="contributors" type="text" placeholder="Members"
-                        class="pl-4 rounded-xl h-[35px] w-full border ">
+                    <input id="contributors" type="text" placeholder="Members" class="pl-4 rounded-xl h-[35px] w-full border ">
                 </div>
                 <div>
-                    <input id="expires" type="date" placeholder="Due in"
-                        class="pl-4 rounded-xl h-[35px] w-full border ">
+                    <input id="expires" type="date" placeholder="Due in" class="pl-4 rounded-xl h-[35px] w-full border ">
                 </div>
                 <p class="text-gray-500 text-sm mt-2"> Upload a cover photo</p>
                 <div class="task-file-input-container mt-3">
@@ -311,7 +312,7 @@
                         <div class="right-tab flex gap-0 relative items-center justify-between sm:gap-3">
                             <p>Show</p>
                             <div id="show-filter-options"
-                                class="w-[110px] flex gap-2 cursor-pointer rounded-lg items-center justify-center border border-gray-300">
+                                class="w-[110px] z-10 flex gap-2 cursor-pointer rounded-lg items-center justify-center border border-gray-300">
                                 <p id="filtering">All</p>
                                 <i class="fa fa-angle-down" aria-hidden="true"></i>
                             </div>
@@ -322,16 +323,22 @@
                             </div>
                         </div>
                     </div>
-                    <div class="results flex gap-4 items-center mt-6">
+                    <div class="all-results gap-4 items-center mt-6 hidden">
+                        <div id="all-back">
+                            <i class="material-icons-outlined cursor-pointer"
+                                style="font-size: 0.975rem;">arrow_back</i>
+                        </div>
+                    </div>
+                    <div class="results gap-4 items-center mt-6 hidden">
                         <div id="back">
                             <i class="material-icons-outlined cursor-pointer"
                                 style="font-size: 0.975rem;">arrow_back</i>
                         </div>
-                        <p id="search-results" class="my-2 text-xs "><span id="result-number">17</span> results
+                        <p id="search-results" class="my-2 text-xs "><span id="result-number">0</span> results
                             found</p>
                     </div>
 
-                    <div class="w-full overflow-hidden sm:rounded-lg">
+                    <div class="w-full overflow-x-hidden sm:rounded-lg mt-4">
                         <table class="min-w-full divide-y">
                             <thead>
                                 <tr>
