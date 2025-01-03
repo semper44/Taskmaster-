@@ -5,4 +5,5 @@ whitenoise==6.4.0
 djangorestframework==3.14
 django-cors-headers==4.0
 cloudinary==1.30
+django-environ==0.9.0
 dj-database-url==0.5
