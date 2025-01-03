@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from decouple import config
 import environ
 import cloudinary
 import cloudinary.uploader
@@ -142,7 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS= True
 
-DATABASE_URL= os.getenv('URL')
+DATABASE_URL= config('URL')
 DATABASES = {'default':dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
 
 
