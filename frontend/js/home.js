@@ -1,4 +1,6 @@
 $(document).ready(function() {
+    console.log(ENV.API_KEY); // Use the variables
+    console.log(ENV.API_URL);
     let createModal =$('#create-modal')
     let updateModal =$('#update-modal')
     let images = ["images/15_Q0rCeTd.jpg", "images/768.png", "images/cover.jpg", "images/IMG_nMnY6QO.jpg", "images/R_1.jpg", "images/wp.jpg"]
@@ -133,7 +135,7 @@ $(document).ready(function() {
  
     // fecthing request
     $.ajax({
-        url: 'http://127.0.0.1:8000/tasks/list/',
+        url: `${API_URL}/tasks/list/`,
         method: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -167,7 +169,7 @@ $(document).ready(function() {
         
 
         $.ajax({
-            url: 'http://127.0.0.1:8000/tasks/create/',
+            url: `${API_URL}/tasks/create/`,
             method: 'POST',
             processData: false, 
             contentType: false, 
@@ -235,7 +237,7 @@ $(document).ready(function() {
         $showOptionsDiv.hide()
         
         $.ajax({
-            url: `http://127.0.0.1:8000/tasks/delete/${name}/`,
+            url: `${API_URL}/tasks/delete/${name}/`,
             method: 'DELETE',
             dataType: 'json',
             success: function(response) {
@@ -362,7 +364,7 @@ $(document).ready(function() {
     
         // Perform the AJAX request
         $.ajax({
-            url: `http://127.0.0.1:8000/tasks/update/${globalName}/`,
+            url: `${API_URL}/tasks/update/${globalName}/`,
             method: 'PATCH',
             data: formData,
             processData: false,
@@ -469,7 +471,7 @@ $(document).ready(function() {
     let baseTypingTimer;
     // Function to perform the AJAX request
     function search(query) {
-        const url = 'http://127.0.0.1:8000/tasks/search/?q=' + query;
+        const url = `${API_URL}/tasks/search/?q=` + query;
 
         // Clear previous timeouts
         clearTimeout(baseTypingTimer);
@@ -596,7 +598,7 @@ $(document).ready(function() {
         $showOptionsDiv.hide()
         
         $.ajax({
-            url: `http://127.0.0.1:8000/tasks/finish-tasks/${name}/`,
+            url: `${API_URL}/tasks/finish-tasks/${name}/`,
             method: 'PATCH',
             dataType: 'json',
             success: function(response) {
