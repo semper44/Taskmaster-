@@ -144,7 +144,7 @@ $(document).ready(function() {
                 createANewTableRow(item, index, firstTbody)
             
             });
-            // $("#loading").hide()
+            $("#loading").hide()
         },
         error: function(xhr, status, error) {
             console.error('Error fetching data:', error);
