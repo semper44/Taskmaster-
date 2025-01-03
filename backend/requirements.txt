@@ -2,3 +2,7 @@ Django==3.2.23
 psycopg2-binary==2.9.10 ; python_version >= "3.12" and python_version < "4.0"
 gunicorn==20.1.0
 whitenoise==6.4.0
+djangorestframework==3.14
+django-cors-headers==4.0
+cloudinary==1.30
+dj-database-url==0.5
