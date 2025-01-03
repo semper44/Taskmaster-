@@ -1,5 +1,5 @@
 # install Dependencies
-poetry install
+pip install -r requirements.txt
 
 # run Migrations
 python manage.py migrate
