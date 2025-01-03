@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import Taskapi 
@@ -7,6 +6,8 @@ from rest_framework import status, generics
 from .models import Tasks
 from django.db.models import Q
 from django.db.models import F, Max, Count
+import json
+
 
 
 
@@ -23,17 +24,25 @@ class CreateTask(APIView):
             highest_number = highest_number["max_tasks"] + 1
         
         mutable_querydict = request.data.copy()
+        mutable_querydict.get('expires', None)
         mutable_querydict["tasks_number"] = highest_number
 
-        print(mutable_querydict)
         serializer = Taskapi(data=mutable_querydict, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            print(serializer.error_messages)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+                  # Log detailed errors for debugging
+            # error_details = {
+            #     field: errors for field, errors in serializer.errors.items()
+            # }
+            # print(f"Validation errors: {error_details}")
+            # return Response({
+            #     "error": "Validation failed",
+            #     "details": error_details
+            # }, status=status.HTTP_400_BAD_REQUEST)
+            formatted_errors = {field: ", ".join(errors) for field, errors in serializer.errors.items()}
+            return Response(formatted_errors, status=status.HTTP_400_BAD_REQUEST)
 
 class TaskQuerysetMixin:
     def get_queryset(self):
@@ -70,14 +79,17 @@ class TaskUpdateView(TaskQuerysetMixin, generics.UpdateAPIView):
         name = self.kwargs.get('name')  # Get the 'pk' captured from URL
         try:
             instance = self.get_queryset().get(name=name)
-            print(instance, "first")
-            print(request.data, "second")
             serializer = self.get_serializer(instance, data=request.data, partial=True, context={'request':request})
-            print(serializer.error_messages, "second")
-            print(request.data, "third")
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+                # serializer.is_valid(raise_exception=True)
+                # serializer.save()
+                # return Response(serializer.data)
+            else:
+                formatted_errors = {field: ", ".join(errors) for field, errors in serializer.errors.items()}
+            return Response(formatted_errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Tasks.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -88,7 +100,6 @@ class TaskSearchView(TaskQuerysetMixin,generics.ListAPIView):
     def get_queryset(self):
         queryset = super().get_queryset()
         search_param = self.request.query_params.get('q', None)        
-        print(search_param)
 
         if search_param:
                 name_filter = Q(name__icontains=search_param)
@@ -117,16 +128,15 @@ class TaskFinish(TaskQuerysetMixin, generics.UpdateAPIView):
         name = self.kwargs.get('name')  # Get the 'pk' captured from URL
         try:
             instance = self.get_queryset().get(name=name)
+            serializer = self.serializer_class(instance)
             if instance.status == "Started":
                 instance.status = "Finished"
                 instance.save(update_fields=["status"]) 
-                return Response({}, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                return Response({"error": "Task is not in 'Started' status, It cannot be finished"},
-                            status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Task is not in 'Started' status, It cannot be finished"},status=status.HTTP_400_BAD_REQUEST)
         except Tasks.DoesNotExist:
-            return Response({"error": "Task not found."},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Task not found."},status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)},
                             status=status.HTTP_400_BAD_REQUEST)

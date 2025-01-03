@@ -142,6 +142,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS= True
 
+print("env('HOST')")
+print(env('HOST'))
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -152,10 +154,10 @@ if RENDER_EXTERNAL_HOSTNAME:
     SECURE_HSTS_INCLUDE_SUBDOMAINS =True
     SECURE_HSTS_PRELOAD =True
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-    DATABASE_URL= env('HOST')
+    DATABASE_URL= env('URL')
     DATABASES = {'default':dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
 else:
-    DATABASE_URL= env('HOST')
+    DATABASE_URL= env('URL')
     DATABASES = {'default':dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
 
 
