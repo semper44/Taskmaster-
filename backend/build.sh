@@ -1,3 +1,4 @@
+pip install --upgrade pip
 # install Dependencies
 pip install -r requirements.txt
 
