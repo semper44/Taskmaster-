@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    console.log(ENV.API_KEY); // Use the variables
     console.log(ENV.API_URL);
     let createModal =$('#create-modal')
     let updateModal =$('#update-modal')
@@ -135,7 +134,7 @@ $(document).ready(function() {
  
     // fecthing request
     $.ajax({
-        url: `${API_URL}/tasks/list/`,
+        url: `${ENV.API_URL}/tasks/list/`,
         method: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -169,7 +168,7 @@ $(document).ready(function() {
         
 
         $.ajax({
-            url: `${API_URL}/tasks/create/`,
+            url: `${ENV.API_URL}/tasks/create/`,
             method: 'POST',
             processData: false, 
             contentType: false, 
@@ -237,7 +236,7 @@ $(document).ready(function() {
         $showOptionsDiv.hide()
         
         $.ajax({
-            url: `${API_URL}/tasks/delete/${name}/`,
+            url: `${ENV.API_URL}/tasks/delete/${name}/`,
             method: 'DELETE',
             dataType: 'json',
             success: function(response) {
@@ -364,7 +363,7 @@ $(document).ready(function() {
     
         // Perform the AJAX request
         $.ajax({
-            url: `${API_URL}/tasks/update/${globalName}/`,
+            url: `${ENV.API_URL}/tasks/update/${globalName}/`,
             method: 'PATCH',
             data: formData,
             processData: false,
@@ -471,7 +470,7 @@ $(document).ready(function() {
     let baseTypingTimer;
     // Function to perform the AJAX request
     function search(query) {
-        const url = `${API_URL}/tasks/search/?q=` + query;
+        const url = `${ENV.API_URL}/tasks/search/?q=` + query;
 
         // Clear previous timeouts
         clearTimeout(baseTypingTimer);
@@ -598,7 +597,7 @@ $(document).ready(function() {
         $showOptionsDiv.hide()
         
         $.ajax({
-            url: `${API_URL}/tasks/finish-tasks/${name}/`,
+            url: `${ENV.API_URL}/tasks/finish-tasks/${name}/`,
             method: 'PATCH',
             dataType: 'json',
             success: function(response) {
