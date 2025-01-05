@@ -85,7 +85,17 @@ class TaskUpdateView(TaskQuerysetMixin, generics.UpdateAPIView):
         name = self.kwargs.get('name')  # Get the 'pk' captured from URL
         try:
             instance = self.get_queryset().get(name=name)
-            serializer = self.get_serializer(instance, data=request.data, partial=True, context={'request':request})
+            mutable_querydict = request.data.copy()
+            expires = mutable_querydict.get('expires', None)
+            if expires:
+                expires_datetime = datetime.strptime(expires, '%Y-%m-%d')  # Parse the date
+                mutable_querydict['expires'] = expires_datetime.isoformat()  # Convert to ISO format
+            else:
+                return Response(
+                    {"expires": "Invalid date format. Please use YYYY-MM-DD."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer = self.get_serializer(instance, data=mutable_querydict, partial=True, context={'request':request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
