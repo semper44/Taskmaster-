@@ -194,7 +194,8 @@ else:
     DATABASES = {'default':dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
 
 cloudinary.config( 
-  	cloud_name ='dboagqxsq',
-  	api_key =725341687541998,
-  	api_secret ='mECBTg47TvbhaXePH3Gb4Z78hzg'
+  	cloud_name = config('CLOUD_NAME'),
+  	api_key = config('API_KEY'),
+  	api_secret = config('API_SECRET'),
+    secure = True 
 )

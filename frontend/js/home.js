@@ -322,11 +322,12 @@ $(document).ready(function() {
             // If no file is selected, i fetch the image from the `src` attribute
             const imageSrc = $('#update-modalpreview').attr('src');
             if (imageSrc && imageSrc !== '#') {
+                const secureImageSrc = imageSrc.replace('http://', 'https://');
                 try {
                     // Fetch the image and convert it to a Blob
-                    const response = await fetch(imageSrc);
+                    const response = await fetch(secureImageSrc);
 
-                    console.log("Image source:", imageSrc);
+                    console.log("Image source:", secureImageSrc);
 
 
                     if (!response.ok) {
