@@ -307,7 +307,7 @@ $(document).ready(function() {
     })
 
     // updating tasks
-    $("#update-submit").on('click', async function (e) {
+    $("#update-submit").off('click').on('click', async function (e) {
         console.log($('#update-task_id_file')[0].files[0]);
         
         $("#loadingmodal").show();
@@ -325,6 +325,14 @@ $(document).ready(function() {
                 try {
                     // Fetch the image and convert it to a Blob
                     const response = await fetch(imageSrc);
+
+                    console.log("Image source:", imageSrc);
+
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const blob = await response.blob();
     
                     // Create a File object from the Blob
