@@ -5,16 +5,17 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from .models import Tasks
 from django.db.models import Q
-from django.db.models import F, Max, Count
-import json
+from django.db.models import F, Max
+from datetime import datetime
 
 
 
 
 
 # Create your views here.
+
 class CreateTask(APIView):
-    parser_classes= [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, format=None):
         highest_number = Tasks.objects.aggregate(max_tasks=Max('tasks_number'))
@@ -22,9 +23,23 @@ class CreateTask(APIView):
             highest_number = 1
         else:
             highest_number = highest_number["max_tasks"] + 1
-        
+
         mutable_querydict = request.data.copy()
-        mutable_querydict.get('expires', None)
+        print('mutable_querydict')
+        print(mutable_querydict)
+
+        # Convert the 'expires' field to a datetime string in the required format
+        expires = mutable_querydict.get('expires', None)
+        if expires:
+            try:
+                expires_datetime = datetime.strptime(expires, '%Y-%m-%d')  # Parse the date
+                mutable_querydict['expires'] = expires_datetime.isoformat()  # Convert to ISO format
+            except ValueError as e:
+                return Response(
+                    {"expires": "Invalid date format. Please use YYYY-MM-DD."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         mutable_querydict["tasks_number"] = highest_number
 
         serializer = Taskapi(data=mutable_querydict, context={'request': request})
@@ -32,15 +47,6 @@ class CreateTask(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-                  # Log detailed errors for debugging
-            # error_details = {
-            #     field: errors for field, errors in serializer.errors.items()
-            # }
-            # print(f"Validation errors: {error_details}")
-            # return Response({
-            #     "error": "Validation failed",
-            #     "details": error_details
-            # }, status=status.HTTP_400_BAD_REQUEST)
             formatted_errors = {field: ", ".join(errors) for field, errors in serializer.errors.items()}
             return Response(formatted_errors, status=status.HTTP_400_BAD_REQUEST)
 
