@@ -327,7 +327,7 @@ $(document).ready(function() {
                     // Fetch the image and convert it to a Blob
                     const response = await fetch(secureImageSrc);
 
-                    console.log("Image source:", secureImageSrc);
+                    console.log("Img source:", secureImageSrc);
 
 
                     if (!response.ok) {
