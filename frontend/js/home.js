@@ -59,7 +59,7 @@ $(document).ready(function() {
 
         // Creating and append td for the second column
         console.log(dateDue);
-        let td2 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
+        let td2 = $('<td>').addClass('hidden lg:block px-6 py-4 whitespace-nowrap');
         td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue)).attr('content', item.expires);
         // adding numbers for easy updating of centraldata
         let tableNumber = $('<div>').addClass('hidden');
@@ -90,21 +90,21 @@ $(document).ready(function() {
         tr.append(td4);
 
         // Create and append td for the fifth column
-        let td5 = $('<td>').addClass('hidden lg:block px-6 py-4 whitespace-nowrap');
-        let div2 = $('<div>').addClass('image-parent flex items-center');
+        let td5 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
+        let div2 = $('<div>').addClass('hidden lg:block image-parent flex items-center');
         let strings =  item.contributors.split(",")
         div2.append($('<img>').attr('src', images[random]).attr('alt', strings[0]).addClass('first-string w-[20px] h-[20px] rounded-full'));
         div2.append($('<img>').attr('src', images[random2]).attr('alt', strings[1]).addClass('second-string w-[20px] h-[20px] rounded-full'));
         let innerDiv = $('<div>').addClass('w-[20px] h-[20px] rounded-full bg-purple-50 relative flex flex-col justify-center items-center');
         innerDiv.append($('<div>').addClass('flex absolute').append($('<p>').addClass('text-sm text-purple-300').text('+')).append($('<p>').addClass('text-sm text-purple-300').text('3')));
         div2.append(innerDiv);
-        div2.append($('<div>').addClass('task-options').append($('<i>').addClass('fa fa-ellipsis-v ml-4 text-gray-500 text-sm cursor-pointer').attr('aria-hidden', 'true')));
         let showOptionsDiv = $('<div>').addClass('show-options').addClass('w-[120px] hidden bg-white px-4 py-3 right-[40px] rounded-lg absolute top-[40px] z-50');
         showOptionsDiv.append($('<div>').addClass('flex gap-3 cursor-pointer mb-4').append($('<p>').addClass('text-gray-500').text('Delete').addClass('delete-task')));
         showOptionsDiv.append($('<div>').addClass('show-update').addClass('flex gap-3 cursor-pointer mb-4').append($('<p>').addClass('text-gray-500').text('Update')));
         showOptionsDiv.append($('<div>').addClass('show-finish').addClass('flex gap-3 cursor-pointer').append($('<p>').addClass('text-gray-500').text('Finish')));
         // div2.append(showOptionsDiv);
         td5.append(div2);
+        td5.append($('<div>').addClass('task-options').append($('<i>').addClass('fa fa-ellipsis-v ml-4 text-gray-500 text-sm cursor-pointer').attr('aria-hidden', 'true')));
         td5.append(showOptionsDiv);
         tr.append(td5);
 
