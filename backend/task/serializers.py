@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Tasks
 
 class Taskapi(serializers.ModelSerializer):
+    print("gold")
     total_tasks = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
 
@@ -20,16 +21,16 @@ class Taskapi(serializers.ModelSerializer):
         errors = {}
 
         if not data.get('name'):
-            errors['name'] = "The 'name' field cannot be empty. Please provide a valid value."
+            errors['name'] = "The 'Name' field cannot be empty. Please provide a valid value."
         
         if not data.get('expires'):
-            errors['expires'] = "The 'expires' field cannot be empty. Please provide a valid value."
+            errors['expires'] = "The 'Expires' field cannot be empty. Please provide a valid value."
         
         if not data.get('contributors'):
-            errors['contributors'] = "The 'contributors' field cannot be empty. Please provide a valid value."
+            errors['contributors'] = "The 'Members' field cannot be empty. Please provide a valid value, can be any name."
 
         if not data.get('image'):
-            errors['image'] = "The 'image' field cannot be empty. Please uplaod an image."
+            errors['image'] = "The 'Image' field cannot be empty. Please uplaod an image."
 
         if errors:
             raise serializers.ValidationError(errors)

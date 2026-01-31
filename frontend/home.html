@@ -276,12 +276,8 @@
                             <i class="material-icons-outlined text-white text-sm cursor-pointer">tune</i>
                         </div>
                         <div id="create-task"
-                            class="hidden w-[60px] h-[40px] bg-purple-50 rounded-md md:flex items-center justify-center">
+                            class="w-[60px] h-[40px] bg-purple-50 rounded-md flex items-center justify-center">
                             <i class="material-icons-outlined cursor-pointer">add_circle</i>
-                        </div>
-                        <div id="topbar-menu"
-                            class="w-[60px] h-[40px] bg-purple-300 flex items-center justify-center md:hidden">
-                            <i class="cursor-pointer fa fa-plus-circle" aria-hidden="true"></i>
                         </div>
                     </div>
                 </div>
@@ -310,7 +306,7 @@
                         </div>
 
                         <div class="right-tab flex gap-0 relative items-center justify-between sm:gap-3">
-                            <p>Show</p>
+                            <p class=" border border-gray-300 w-[110px] z-10 flex gap-2 rounded-lg items-center justify-center">Show</p>
                             <div id="show-filter-options"
                                 class="w-[110px] z-10 flex gap-2 cursor-pointer rounded-lg items-center justify-center border border-gray-300">
                                 <p id="filtering">All</p>
@@ -351,7 +347,7 @@
                                         Due In
                                     </th>
                                     <th scope="col"
-                                        class="px-8 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        class="hidden md:block py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Tasks
                                     </th>
                                     <th scope="col"
@@ -359,7 +355,7 @@
                                         Status
                                     </th>
                                     <th scope="col"
-                                        class="px-8 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        class="hidden lg:block px-8 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Members
                                     </th>
                                 </tr>
