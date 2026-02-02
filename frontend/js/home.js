@@ -59,7 +59,7 @@ $(document).ready(function() {
 
         // Creating and append td for the second column
         console.log(dateDue);
-        let td2 = $('<td>').addClass('hidden lg:block px-6 py-4 whitespace-nowrap');
+        let td2 = $('<td>').addClass('hidden lg:inline-block px-6 py-4 whitespace-nowrap');
         td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue)).attr('content', item.expires);
         // adding numbers for easy updating of centraldata
         let tableNumber = $('<div>').addClass('hidden');
@@ -68,7 +68,7 @@ $(document).ready(function() {
         tr.append(td2);
 
         // Create and append td for the third column
-        let td3 = $('<td>').addClass('hidden md:block px-6 py-4 whitespace-nowrap ');
+        let td3 = $('<td>').addClass('hidden md:inline-block px-6 py-4 whitespace-nowrap ');
         td3.append($('<p>').addClass('font-bold').text(item.tasks_number +"/"+item.total_tasks));
         td3.append($('<p>').addClass('text-sm text-gray-400').text('Tasks'));
         tr.append(td3);
@@ -91,7 +91,7 @@ $(document).ready(function() {
 
         // Create and append td for the fifth column
         let td5 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
-        let div2 = $('<div>').addClass('hidden lg:flex image-parent items-center');
+        let div2 = $('<div>').addClass('image-parent items-center');
         let strings =  item.contributors.split(",")
         div2.append($('<img>').attr('src', images[random]).attr('alt', strings[0]).addClass('first-string w-[20px] h-[20px] rounded-full'));
         div2.append($('<img>').attr('src', images[random2]).attr('alt', strings[1]).addClass('second-string w-[20px] h-[20px] rounded-full'));
