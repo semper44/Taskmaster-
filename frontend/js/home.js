@@ -90,8 +90,8 @@ $(document).ready(function() {
         tr.append(td4);
 
         // Create and append td for the fifth column
-        let td5 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
-        let div2 = $('<div>').addClass('image-parent items-center');
+        let td5 = $('<td>').addClass('px-6 py-4 flex items-center whitespace-nowrap');
+        let div2 = $('<div>').addClass('image-parent hidden lg:flex items-center');
         let strings =  item.contributors.split(",")
         div2.append($('<img>').attr('src', images[random]).attr('alt', strings[0]).addClass('first-string w-[20px] h-[20px] rounded-full'));
         div2.append($('<img>').attr('src', images[random2]).attr('alt', strings[1]).addClass('second-string w-[20px] h-[20px] rounded-full'));
