@@ -58,17 +58,18 @@ $(document).ready(function() {
         tr.append(td1);
 
         // Creating and append td for the second column
-        console.log(dateDue);
-        let td2 = $('<td>').addClass('hidden lg:inline-block px-6 py-4 whitespace-nowrap');
+        console.log(dateDue);        
+        let td2 = $('<td>').addClass('due-in pl-6 pr-4 py-4 whitespace-nowrap');
         td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue)).attr('content', item.expires);
         // adding numbers for easy updating of centraldata
         let tableNumber = $('<div>').addClass('hidden');
         tableNumber.attr('data', index)
         td2.append(tableNumber)
         tr.append(td2);
+        
 
         // Create and append td for the third column
-        let td3 = $('<td>').addClass('hidden md:inline-block px-6 py-4 whitespace-nowrap ');
+        let td3 = $('<td>').addClass('pr-6 pl-4 py-4 whitespace-nowrap ');
         td3.append($('<p>').addClass('font-bold').text(item.tasks_number +"/"+item.total_tasks));
         td3.append($('<p>').addClass('text-sm text-gray-400').text('Tasks'));
         tr.append(td3);
@@ -80,7 +81,7 @@ $(document).ready(function() {
         }else{
             progress = days
         }
-        let td4 = $('<td>').addClass('px-6 whitespace-nowrap');
+        let td4 = $('<td>').addClass('status px-6 whitespace-nowrap');
         td4.append($('<p>').addClass('text-blue-300').text('In Progress'));
         let progressBarDiv = $('<div>').addClass('w-[80%] bg-gray-200 rounded-lg overflow-hidden');
         let progressBarDivSubDiv = $('<div>').attr('id', 'progress-bar').addClass('bg-blue-300 h-2').css("width", `${progress}%`);
@@ -91,7 +92,7 @@ $(document).ready(function() {
 
         // Create and append td for the fifth column
         let td5 = $('<td>').addClass('px-6 py-4 flex items-center whitespace-nowrap');
-        let div2 = $('<div>').addClass('image-parent hidden lg:flex items-center');
+        let div2 = $('<div>').addClass('image-parent flex items-center');
         let strings =  item.contributors.split(",")
         div2.append($('<img>').attr('src', images[random]).attr('alt', strings[0]).addClass('first-string w-[20px] h-[20px] rounded-full'));
         div2.append($('<img>').attr('src', images[random2]).attr('alt', strings[1]).addClass('second-string w-[20px] h-[20px] rounded-full'));
@@ -112,6 +113,22 @@ $(document).ready(function() {
         console.log(element);
         element.append(tr);
     }
+
+    window.addEventListener('resize', ()=>{
+        let elements = document.getElementsByClassName("due-in")
+       
+        // adjusting for DUE IN
+        const show = window.innerWidth > 768;
+        document.querySelectorAll('.due-in').forEach(td => {
+            td.style.display = show ? 'table-cell' : 'none';
+        });
+
+        // adjusting for STATUS
+        const tableWIDTH = window.innerWidth > 768;
+        document.querySelectorAll('.status').forEach(td => {
+            td.style.display = show ? 'table-cell' : 'none';
+        });
+    });
 
     // show create task modal
     $('#create-task').on('click',function(){
