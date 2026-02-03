@@ -66,7 +66,15 @@ $(document).ready(function() {
         tableNumber.attr('data', index)
         td2.append(tableNumber)
         tr.append(td2);
+        if(window.innerWidth > 768 && td2){
+            console.log("nawaooo", td2)
+            td2.css('display', 'table-cell');
+        }
+        else{
+            td2.css('display', 'none');
+        }
         
+       
 
         // Create and append td for the third column
         let td3 = $('<td>').addClass('pr-6 pl-4 py-4 whitespace-nowrap ');
@@ -89,6 +97,13 @@ $(document).ready(function() {
         
         td4.append(progressBarDiv);
         tr.append(td4);
+        if(window.innerWidth > 768 && td4){
+            console.log("brooo", td4)
+            td4.css('display', 'table-cell');
+        }
+        else{
+            td4.css('display', 'none');
+        }
 
         // Create and append td for the fifth column
         let td5 = $('<td>').addClass('px-6 py-4 flex items-center whitespace-nowrap');
@@ -114,17 +129,15 @@ $(document).ready(function() {
         element.append(tr);
     }
 
-    window.addEventListener('resize', ()=>{
-        let elements = document.getElementsByClassName("due-in")
-       
+    window.addEventListener('resize', ()=>{       
         // adjusting for DUE IN
         const show = window.innerWidth > 768;
+        console.log("mannnn")
         document.querySelectorAll('.due-in').forEach(td => {
             td.style.display = show ? 'table-cell' : 'none';
         });
 
         // adjusting for STATUS
-        const tableWIDTH = window.innerWidth > 768;
         document.querySelectorAll('.status').forEach(td => {
             td.style.display = show ? 'table-cell' : 'none';
         });
