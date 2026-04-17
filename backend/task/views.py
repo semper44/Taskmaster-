@@ -253,13 +253,35 @@ class AITaskActionView(APIView):
                 data = json.loads(clean)
                 print(response.text, data, "heyyy")
 
-                return Response({"reply": response.text})
-            except errors.ServerError:
-                if attempt < 2:
-                    time.sleep(2) # Wait 2 seconds before retrying
-                    continue
-                return Response({"error": "Server busy, try again in a moment"}, status=503)
+                return Response({"data": data})
+            except errors.ClientError as e:
+                # Handle quota / rate limit
+                if "RESOURCE_EXHAUSTED" in str(e):
+                    return Response(
+                        {"error": "AI limit reached. Please wait a moment."},
+                        status=429
+                    )
 
+                return Response(
+                    {"error": "AI client error", "details": str(e)},
+                    status=500
+                )
+
+            except json.JSONDecodeError:
+                return Response(
+                    {"error": "Invalid AI response format"},
+                    status=500
+                )
+
+            except Exception as e:
+                if attempt < 2:
+                    time.sleep(2)
+                    continue
+
+                return Response(
+                    {"error": "Unexpected error", "details": str(e)},
+                    status=500
+                )
 
 
 
@@ -289,10 +311,32 @@ class AIChatView(APIView):
                 print(response.text, response, "heyyy")
 
                 return Response({"reply": response.text})
-            except errors.ServerError:
-                if attempt < 2:
-                    time.sleep(2) # Wait 2 seconds before retrying
-                    continue
-                return Response({"error": "Server busy, try again in a moment"}, status=503)
+            except errors.ClientError as e:
+                # Handle quota / rate limit
+                if "RESOURCE_EXHAUSTED" in str(e):
+                    return Response(
+                        {"error": "AI limit reached. Please wait a moment."},
+                        status=429
+                    )
 
+                return Response(
+                    {"error": "AI client error", "details": str(e)},
+                    status=500
+                )
+
+            except json.JSONDecodeError:
+                return Response(
+                    {"error": "Invalid AI response format"},
+                    status=500
+                )
+
+            except Exception as e:
+                if attempt < 2:
+                    time.sleep(2)
+                    continue
+
+                return Response(
+                    {"error": "Unexpected error", "details": str(e)},
+                    status=500
+                )
         
