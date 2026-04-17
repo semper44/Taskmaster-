@@ -1,3 +1,6 @@
+import json
+from pyexpat import model
+
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import Taskapi 
@@ -6,7 +9,11 @@ from rest_framework import status, generics
 from .models import Tasks
 from django.db.models import Q
 from django.db.models import F, Max
-from datetime import datetime
+import time
+from google import genai
+from django.conf import settings
+import requests
+from google.genai import errors
 
 
 
@@ -157,3 +164,132 @@ class TaskFinish(TaskQuerysetMixin, generics.UpdateAPIView):
             return Response({"error": str(e)},
                             status=status.HTTP_400_BAD_REQUEST)
 
+
+def build_prompt(user_message, tasks):
+    task_list = "\n".join([t.title for t in tasks])
+
+    return f"""
+    You are a productivity assistant.
+
+    Here are the user's tasks:
+    {task_list}
+
+    User request:
+    {user_message}
+
+    Respond helpfully.
+    """
+
+
+def call_gemini(prompt):
+    response = requests.post(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+        params={"API_KEY": settings.GEMINI_API_KEY},
+        json={
+            "contents": [
+                {
+                    "parts": [{"text": prompt}]
+                }
+            ]
+        }
+    )
+
+    data = response.json()
+
+    return data["candidates"][0]["content"]["parts"][0]["text"]
+
+
+
+class AITaskActionView(APIView):
+    def post(self, request):
+        task_title = request.data.get("task")
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+
+
+        prompt = f"""
+        You are an AI assistant inside a task manager.
+
+        Your job is to analyze a task and return structured output.
+
+        Task:
+        "{task_title}"
+
+        Do the following:
+        1. Summarize the task in one short sentence
+        2. Improve the task to make it clear and actionable
+        3. Break the task into small actionable subtasks
+
+        Return ONLY valid JSON in this format:
+
+        {{
+        "summary": "short summary",
+        "improved": "clear and actionable version",
+        "subtasks": [
+            "step 1",
+            "step 2",
+            "step 3"
+        ]
+        }}
+
+        Rules:
+        - Do not include any explanation
+        - Do not include extra text outside JSON
+        - Keep responses concise
+        - Be friendly and encouraging
+        - Explain concepts simply
+        - Address the user by their name when possible
+        - Do not go beyond giving advice related to task management and productivity
+        """
+
+        for attempt in range(3):
+            try:
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash', 
+                    contents=prompt
+                )
+                print(response.text, response, "heyyy")
+
+                return Response({"reply": response.text})
+            except errors.ServerError:
+                if attempt < 2:
+                    time.sleep(2) # Wait 2 seconds before retrying
+                    continue
+                return Response({"error": "Server busy, try again in a moment"}, status=503)
+
+
+
+
+class AIChatView(APIView):
+    def post(self, request):
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        message = request.data.get("message")
+        print("helo", message)
+        prompt = f"""
+        You are Zugo, a helpful assistant in a task manager app.
+
+        Rules:
+        - Be friendly and encouraging
+        - Explain concepts simply
+        - Address the user by their name when possible
+        - Do not go beyond giving advice related to task management and productivity
+
+        User: {message}
+        """
+
+        return Response({"reply": "response.text"})
+        # for attempt in range(3):
+        #     try:
+        #         response = client.models.generate_content(
+        #             model='gemini-2.5-flash', 
+        #             contents=prompt
+        #         )
+        #         print(response.text, response, "heyyy")
+
+        #         return Response({"reply": response.text})
+        #     except errors.ServerError:
+        #         if attempt < 2:
+        #             time.sleep(2) # Wait 2 seconds before retrying
+        #             continue
+        #         return Response({"error": "Server busy, try again in a moment"}, status=503)
+
+        
