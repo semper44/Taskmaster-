@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="./styles/toastify.css">
 <link rel="stylesheet" href="./styles/google_icons.css">
 <link rel="stylesheet" href="./styles/loading.css">
+<link rel="stylesheet" href="./styles/ai_chat_loading.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <link rel="e:\Chatting-website-master\static\css\toastify.cssstylesheet"
@@ -161,25 +162,90 @@
         </div>
     </div>
 
+    <!-- individual task-modal -->
+    <div id="individual-task-modal" class="relative hidden w-full">
+        <div class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0 bg-black/75"></div>
+            <div
+                style="height: 90%;"
+                class="bg-white w-[90%] md:w-[90%] px-3 rounded-lg z-50">               
+            <i id="individual-task-modal-close" class="material-icons-outlined text-red-600 float-right cursor-pointer py-4">close</i>
+            <div id="task-profile"></div>
+            <p class="cursor-pointer">Summarize</p>
+            <p class="cursor-pointer">Improve</p>
+            <div>
+                <h2>History</h2>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Ai chat-modal -->
+    <div id="ai-chat-modal" class="relative hidden w-full">
+        <div class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0 bg-black/75"></div>
+            <div
+                style="height: 90%;"
+                class="fixed bg-white w-[90%] md:w-[90%] h-[90%] overflow-hidden rounded-lg z-50 flex">               
+                <div class="w-full h-screen flex">
+                    <!-- left history bar     -->
+                        <div style="height: 100vh; overflow-y: auto; border-right-width: 1px;" class="w-[25%] px-3 py-4 h-screen border-r border-r-gray-300">
+                            <h2 id="ai-history" class="text-black lg:block hidden">History</h2>
+                            <i id="expand-history" class="material-icons cursor-pointer text-sm lg:hidden block" style="font-size: 0.85rem; line-height: 1.2rem;">menu</i>
+                        </div>
+                        <!-- right chat bar -->
+                        <div style="width: 75%;" class="px-3 py-4 h-full">
+                            <i id="ai-chat-modal-close" class="material-icons-outlined text-red-600 float-right cursor-pointer">close</i>
+                            <!-- ai-chat-placeholder -->
+                            <div id="ai-chat-placeholder" class="flex flex-col h-[80%] w-full justify-center items-center" style="height: 80%;">
+                                <h1 class="text-black"><span id="gradient-text" class="bg-gradient-to-r from-[#be9ee2] to-white bg-clip-text text-transparent font-bold">Hy Dear</span> This is an AI assited chat</h1>
+                                <img src="images/gradient.jpg" alt="Robot AI" class="w-[35%]" style="width: 35%;">
+                                <p class="text-black pt-3">How can i help?</p>
+                            <!-- input -->
+                                <div class="relative w-[70%] h-[10%]">
+                                    <input id="ai-chat" type="text" placeholder="Chat"
+                                        class="pl-4 mt-4 rounded-xl border w-full h-full" style="border-color: black;">
+                                    <div id="send-icon" class="absolute top-[55%] right-[5%] cursor-pointer">
+                                        <i class="material-icons-outlined">near_me</i>            
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- ai chat body -->
+                            <div id="ai-chat-body-parent" class="hidden" style="height: 100vh;">
+                                <div id="ai-chat-body" class="h-[65%] mt-4 w-full flex flex-col w-full" style="overflow-y: auto;">
+
+                                </div>
+                                <!-- input -->
+                                <div class="relative w-[70%] h-[10%] justify-self-center">
+                                    <input id="ai-chat-input" type="text" placeholder="Chat"
+                                        class="pl-4 mt-4 rounded-xl border w-full h-full" style="border-color: black;">
+                                    <div id="chat-send-icon" class="absolute top-[55%] right-[5%] cursor-pointer">
+                                        <i class="material-icons-outlined">near_me</i>            
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
     <div class="w-full flex pr-4 pl-2">
 
         <!-- left bar -->
-        <div class=" xl:mr-0 w-[11.5%] h-full float-left hidden md:block">
-            <div class="mt-13" style="height: 46px;"></div>
-            <p class="mb-2 ml-3">Home</p>
+        <div class=" xl:mr-0 w-[11.5%] h-full flex flex-col hidden md:block">
 
-            <div class="tabs float-left">
+            <div class="tabs flex flex-col h-full">
                 <div id="project-tabs" class="hidden xl:block">
                     <div
-                        class="cursor-pointer w-full px-3 py-2  rounded-lg hover:bg-purple-200 hover:text-black flex items-center justify-start gap-3">
-                        <i class="material-icons-outlined cursor-pointer">business_center</i>
-                        </i>
-                        <p>Projects</p>
-                    </div>
-                    <div
-                        class="cursor-pointer w-full px-3 py-2  rounded-lg hover:bg-purple-200 hover:text-black flex items-center justify-start gap-3">
+                        style="background-color: #be9ee2;"
+                        class="cursor-pointer w-full px-3 py-2 mt-[27px] rounded-lg  hover:bg-purple-200 hover:text-black flex items-center justify-start gap-3">
                         <i class="material-icons-outlined cursor-pointer">assignment_turned_in</i>
-                        <p>My Task</p>
+                        <p >My Task</p>
                     </div>
 
                     <div
@@ -204,10 +270,7 @@
                 <!-- second tab  -->
                 <div class="top-tabs w-full grid xl:hidden">
                     <p
-                        class="cursor-pointer w-full px-3 py-2  rounded-lg hover:bg-purple-200 hover:text-black flex items-center justify-start gap-3">
-                        Projects</p>
-                    <p
-                        class="cursor-pointer w-full px-3 py-2  rounded-lg hover:bg-purple-200 hover:text-black flex items-center justify-start gap-3">
+                        class="cursor-pointer w-full px-3 py-2 mt-[27px] rounded-lg hover:bg-purple-200 bg-purple-300 hover:text-black flex items-center justify-start gap-3">
                         My Task</p>
                     <p
                         class="cursor-pointer w-full px-3 py-2  rounded-lg hover:bg-purple-200 hover:text-black flex items-center justify-start gap-3">
@@ -233,14 +296,8 @@
                     </div>
                 </div>
 
-                <!-- profile -->
-                <div class="flex gap-2 items-center absolute bottom-[-55%] ml-4">
-                    <img src="./images/R_1.jpg" alt="" class="w-[50px] h-[50px] rounded-full">
-                    <p class="font-bold">Profile</p>
-                </div>
             </div>
-
-
+            
         </div>
 
         <!-- center, topbar and right bar  -->
@@ -272,8 +329,12 @@
                             <!-- <i class="material-icons-outlined cursor-pointer absolute text-black right-2 top-1">search_outlined</i> -->
                         </div>
 
-                        <div class="w-[30px] h-[30px] bg-black rounded-md flex items-center justify-center">
-                            <i class="material-icons-outlined text-white text-sm cursor-pointer">tune</i>
+                        <!-- chat support icon -->
+                        <div id="ai-chat-support" class="md:w-[100px] w-fit p-4 mt-auto shadow-md rounded-full cursor-pointer grid items-center justify-center ">
+                            <div class="w-full flex justify-center">
+                                <i style="font-size: 17px;" class="material-icons-outlined text-[12px]">chat</i>
+                            </div>
+                                <p class="text-[12px] hidden md:flex">Support</p>
                         </div>
                         <div id="create-task"
                             class="w-[60px] h-[40px] bg-purple-50 rounded-md flex items-center justify-center">

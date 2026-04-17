@@ -1,7 +1,7 @@
 $(document).ready(function() {
-    console.log("NV.API_URL");
-    console.log(ENV.API_URL);
     let createModal =$('#create-modal')
+    let aiChatModal =$('#ai-chat-modal')
+    let individualTaskModal =$('#individual-task-modal')
     let updateModal =$('#update-modal')
     let images = ["images/15_Q0rCeTd.jpg", "images/768.png", "images/cover.jpg", "images/IMG_nMnY6QO.jpg", "images/R_1.jpg", "images/wp.jpg"]
     let centralData;
@@ -15,39 +15,47 @@ $(document).ready(function() {
     let p = $("<p>").addClass("font-xl text-red-600 text-center mt-8").text("Nothing found")
 
 
-    function createANewTableRow(item, index, element){
-        let store = []
-        const createdDate = new Date(item.created);
-        const expiresDate = new Date(item.expires);
 
-        const differenceMs = Math.abs(expiresDate - createdDate);
+    function createANewTableRow(item, index, element){
+
+        function getDateOnly(date) {
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        }
+
+        const now = new Date();
+        const dueDate = new Date(item.expires);
+
+        // 🔑 THIS is the key change
+        const today = getDateOnly(now);
+        const due = getDateOnly(dueDate);
+
+        const diffMs = due - today;
+        const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
         let dateDue = "";
-        // Convert milliseconds to days, hours, minutes, and seconds
-        const days = Math.floor(differenceMs / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((differenceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((differenceMs % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((differenceMs % (1000 * 60)) / 1000);
+        // let progress = 0;
 
-
-        if(days > 1){
-            dateDue = `${days} days, ${minutes} mins`
-        }else if(days < 1 && minutes > 1){
-            dateDue = `${minutes} mins`
-        }else if(days < 1 && minutes < 1 && seconds > 1){
-            dateDue = `${seconds} secs`
+        if (diffDays > 1) {
+            dateDue = `In ${diffDays} days`;
+        } else if (diffDays === 1) {
+            dateDue = "In 1 day";
+            // progress = 90
+        } else if (diffDays === 0) {
+            dateDue = "Due today";
+            // progress = 100
+        } else {
+            dateDue = `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) > 1 ? "s" : ""}`;
         }
 
 
-        console.log(item.expires - item.created);
         let random = Math.floor(Math.random()* images.length)
         let random2 = Math.floor(Math.random()* images.length)
-        
+
         // table row
         let tr = $('<tr>').addClass('table-rows shadow-md my-3 rounded-lg relative');
     
         // Create and append td for the first column
-        let td1 = $('<td>').addClass('px-6 py-4 whitespace-nowrap');
+        let td1 = $('<td>').addClass('task-click-button px-6 py-4 whitespace-nowrap cursor-pointer');
         let div1 = $('<div>').addClass('flex items-center gap-3');
         div1.append($('<img>').attr('src', item.image_url).attr('alt', item.name).addClass('first-img fw-[20px] h-[20px] rounded-full'));
         let leftDiv = $('<div>').addClass('left');
@@ -58,7 +66,6 @@ $(document).ready(function() {
         tr.append(td1);
 
         // Creating and append td for the second column
-        console.log(dateDue);        
         let td2 = $('<td>').addClass('due-in pl-6 pr-4 py-4 whitespace-nowrap');
         td2.append($('<p>').addClass('text-center bg-blue-50 rounded p-2').text(dateDue)).attr('content', item.expires);
         // adding numbers for easy updating of centraldata
@@ -67,7 +74,6 @@ $(document).ready(function() {
         td2.append(tableNumber)
         tr.append(td2);
         if(window.innerWidth > 768 && td2){
-            console.log("nawaooo", td2)
             td2.css('display', 'table-cell');
         }
         else{
@@ -83,14 +89,19 @@ $(document).ready(function() {
         tr.append(td3);
 
         // Create and append td for the fourth column
-        let progress;
-        if(days < 1){
-            progress = 100
-        }else{
-            progress = days
-        }
+        const itemCreated = getDateOnly(new Date(item.created));
+        const itemDue = getDateOnly(new Date(item.expires));
+        const itemNow = getDateOnly(new Date());
+
+        const totalDays = (itemDue - itemCreated) / (1000 * 60 * 60 * 24);
+        const elapsedDays = (itemNow - itemCreated) / (1000 * 60 * 60 * 24);
+
+        let progress = (elapsedDays / totalDays) * 100;
+        progress = Math.max(0, Math.min(100, progress));
+
+        console.log(progress, "shuu33333333", elapsedDays, totalDays, itemCreated, itemDue); 
         let td4 = $('<td>').addClass('status px-6 whitespace-nowrap');
-        td4.append($('<p>').addClass('text-blue-300').text('In Progress'));
+        td4.append($('<p>').addClass('text-blue-300').text('Progress'));
         let progressBarDiv = $('<div>').addClass('w-[80%] bg-gray-200 rounded-lg overflow-hidden');
         let progressBarDivSubDiv = $('<div>').attr('id', 'progress-bar').addClass('bg-blue-300 h-2').css("width", `${progress}%`);
         progressBarDiv.append(progressBarDivSubDiv);
@@ -98,7 +109,6 @@ $(document).ready(function() {
         td4.append(progressBarDiv);
         tr.append(td4);
         if(window.innerWidth > 768 && td4){
-            console.log("brooo", td4)
             td4.css('display', 'table-cell');
         }
         else{
@@ -125,14 +135,12 @@ $(document).ready(function() {
         tr.append(td5);
 
         // Append the created row to the table body
-        console.log(element);
         element.append(tr);
     }
 
     window.addEventListener('resize', ()=>{       
         // adjusting for DUE IN
         const show = window.innerWidth > 768;
-        console.log("mannnn")
         document.querySelectorAll('.due-in').forEach(td => {
             td.style.display = show ? 'table-cell' : 'none';
         });
@@ -143,9 +151,68 @@ $(document).ready(function() {
         });
     });
 
+    // toggle history bar
+    $('#expand-history').on('click', function () {
+        $('#ai-history').toggle();
+    });
     // show create task modal
     $('#create-task').on('click',function(){
         createModal.show()
+    })
+    
+    // open ai chat dialogue open and close
+    $('#ai-chat-support').on('click',function(){
+        aiChatModal.show()
+    })
+    $('#ai-chat-modal-close').on('click',function(){
+        aiChatModal.hide()
+        $("#ai-chat-placeholder").show()
+        $("#ai-chat-body").empty()
+    })
+    
+    // open individual chat modal
+    $(document).on("click", ".task-click-button", function () {
+        
+        individualTaskModal.show()
+
+        const $row = $(this);
+        console.log("TITLE:", $row);
+
+        const title = $row.find(".table-name").text();
+        const date = $row.find(".date").text();
+        const due = $row.find(".due-in p").text();
+        const imgSrc = $row.find(".first-img").attr('src');
+
+        let container = $("<div>").addClass("w-full border-b border-b-gray-300 py-2 flex justify-space-between items-center gap-4");
+        let nameHolder = $("<div>")
+        let imageContainer = $("<div>")
+
+        // image
+        let img = $("<img>")
+        .attr("src", imgSrc)
+        .addClass("w-[30px] h-[30px] rounded-full");
+
+        // text
+        let titleP = $("<p>").addClass("font-bold").text(title);
+        let dateP = $("<p>").addClass("text-sm text-gray-400").text(date);
+        let dueP = $("<p>").addClass("text-sm text-blue-400").text(due);
+
+        // append everything
+        let taskProfile = $("#task-profile")
+        nameHolder.append(dateP, dueP);
+        imageContainer.append(img,titleP);
+        container.append(imageContainer, nameHolder);
+        taskProfile.empty()
+        taskProfile.append(container);
+
+
+    });
+
+    $('#ai-chat-support').on('click',function(){
+        
+    })
+    $('#individual-task-modal-close').on('click',function(){
+        individualTaskModal.hide()
     })
     
    
@@ -169,7 +236,6 @@ $(document).ready(function() {
         method: 'GET',
         dataType: 'json',
         success: function(response) {
-            console.log(response, 'ooo');
             centralData = response
             // Iterate over each item in the response
             $.each(response, function(index, item) {
@@ -205,7 +271,6 @@ $(document).ready(function() {
             contentType: false, 
             data: formData,
             success: function (response) {
-                console.log(response);
                 centralData.push(response)
                 createModal.hide();
                 createANewTableRow(response, index=0, firstTbody);
@@ -307,7 +372,6 @@ $(document).ready(function() {
     // to show the update modal
     $(document).on('click', ".show-update", function(){
         let clickedTaskOptions = $(this);
-        console.log($(this), 'this'); 
         globalClickedTaskOptions = $(this); 
         let $showOptionsDiv = clickedTaskOptions.closest('td').find('.show-options');
         $showOptionsDiv.hide()
@@ -339,7 +403,6 @@ $(document).ready(function() {
 
     // updating tasks
     $("#update-submit").off('click').on('click', async function (e) {
-        console.log($('#update-task_id_file')[0].files[0]);
         
         $("#loadingmodal").show();
         e.preventDefault();
@@ -357,8 +420,6 @@ $(document).ready(function() {
                 try {
                     // Fetch the image and convert it to a Blob
                     const response = await fetch(secureImageSrc);
-
-                    console.log("Img source:", secureImageSrc);
 
 
                     if (!response.ok) {
@@ -408,11 +469,7 @@ $(document).ready(function() {
             data: formData,
             processData: false,
             contentType: false,
-            success: function (response) {
-                // console.log(response, 'ppp');
-                // console.log(centralData, 'before');
-                // centralData[globalRowNumber] = response
-                // console.log(centralData,'cc');
+            success: function (response) { 
                 globalTr.find('.first-img').attr('src', response.image_url);
                 let contentTd = globalTr.find('td[content]');
                 contentTd.attr('content', response.expires);
@@ -476,13 +533,9 @@ $(document).ready(function() {
         
         let flag = false
         for(data of centralData){
-            console.log(centralData);
-            console.log(data.status);
-            console.log(clickedValue === data.status);
             if(data.status ===clickedValue ){
                 flag = true
                 createANewTableRow(data, index=0, secondTbody)
-                console.log("ran");
             }
         }
         if(flag === false){
@@ -533,7 +586,6 @@ $(document).ready(function() {
                         $(".results").show()
                     } 
                     $('#result-number').text(data.length)
-                    console.log(data);
                     if (data.length >= 1) {
                         $.each(data, function(index, item) {
                            createANewTableRow(item, index, secondTbody)
@@ -580,11 +632,7 @@ $(document).ready(function() {
     function previewFn(e, parentModal, uploadpreviewImage, modalpreviewCancel, uploadPreview, uploadCancelButton, uploadsubmitButton, modalpreview, taskfileinputcontainer, parentmodalpreview){
         const reader = new FileReader();
         let selectedFile = e.target.files[0];
-        // console.log($(this))
-        // console.log($(this)[0])
-        // console.log($(this).closest('body').find('#create-modal'));
-        // console.log($(this).closest('#task_id_file').closest("#create-modal")[0]);
-    
+
         if (selectedFile) {
             reader.onload = function (e) {
                 $(uploadpreviewImage).attr('src', e.target.result);
@@ -632,7 +680,6 @@ $(document).ready(function() {
 
     $(document).on('click', ".show-finish", function(){
         let name = $(this).closest('tr').find('.table-name').text();
-        console.log( $(this).closest('tr'));
         let $showOptionsDiv = $(this).closest('td').find('.show-options');
         $showOptionsDiv.hide()
         
@@ -641,10 +688,7 @@ $(document).ready(function() {
             method: 'PATCH',
             dataType: 'json',
             success: function(response) {
-                console.log(response, 'fin');
-                console.log(centralData, 'before');
                 centralData[globalRowNumber] = response
-                console.log(centralData,'cc');
                 Toastify({
                     text: "Task marked as finished",
                     duration: 3000,
@@ -675,6 +719,93 @@ $(document).ready(function() {
             }
             });
     })
+
+    function displayMessage(userMessage){
+        $("#ai-chat-placeholder").hide()
+        $("#ai-chat-body-parent").show()
+        console.log("message55555555")
+        // create and append the user's message to the chat body
+        userResponseDiv = $("<div>").addClass("user-response-div bg-gray-200 p-3 w-fit rounded-lg h-fit self-end mt-2");
+        imageAndReplyDIv = $("<div>").addClass("ai-response-div flex gap-3 mt-2 items-center self-start");
+        userText = $("<p>").addClass("text-sm").text(userMessage);
+        aiImage= $("<img>").attr("src", "images/gradient.jpg").addClass("rounded-full w-[35px]")
+        
+        userResponseDiv.append(userText);
+        console.log(userMessage, "userMessage")
+        $("#ai-chat-body").append(userResponseDiv);
+
+        // add a loader to wait for a response from the server
+        loader = $("<span>").addClass("loader").attr("id", "ai-chat-spinner")
+        loaderAndReplyDIv = $("<div>");
+        aiReply = $("<p>").addClass("text-sm hidden");
+        loaderAndReplyDIv.append(loader, aiReply);
+        imageAndReplyDIv.append(aiImage, loaderAndReplyDIv);
+        $("#ai-chat-body").append(imageAndReplyDIv);
+        // imageAndReplyDIv.append(loader);
+        return {"aiReply":aiReply, "loader":loader};
+        
+   };
+
+    // chat api calls
+    function sendMessage(message) {
+        reply = displayMessage(message);
+
+        $.ajax({
+            url: `${ENV.API_URL}/tasks/ai-chat/`,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ message: message }),
+
+            success: function (response) {
+                // displayMessage(response.reply);
+                console.log("reply", reply)
+                reply.aiReply.text(response.reply);
+                reply.aiReply.show();
+                reply.loader.hide();
+                console.log(response.reply, "response from ai chat", reply)
+            },
+
+            error: function (err) {
+                console.error("Error:", err);
+            }
+        });
+    }
+
+
+    function handleSend(triggerElement) {
+        const id = $(triggerElement).attr("id");
+        let message;
+        let input;
+        console.log("Request coming from ID:", id);
+
+       if (id === "send-icon" || id === "ai-chat") {
+        input = $("#ai-chat");
+        } 
+        else if (id === "chat-send-icon" || id === "ai-chat-input") {
+            input = $("#ai-chat-input");
+        }
+        message = input.val();
+
+
+        console.log("omo", message, "choi", input)
+        
+        if (message && message.trim() !== "") {
+            sendMessage(message);
+            input.val("");
+        }
+    }
+
+    // Icon Click Listeners
+    $("#send-icon, #chat-send-icon").on("click", function() {
+        handleSend(this); 
+    });
+    
+    // Enter key listener
+    $("#ai-chat, #ai-chat-input").on("keypress", function(e) {
+        if (e.which === 13) {
+            handleSend(this);
+        }
+    });
 
 
     function generateCircles() {
