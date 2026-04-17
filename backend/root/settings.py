@@ -199,3 +199,6 @@ cloudinary.config(
   	api_secret = config('API_SECRET'),
     secure = True 
 )
+
+GEMINI_API_KEY = config("GEMINI_API_KEY")
+print(GEMINI_API_KEY)
