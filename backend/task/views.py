@@ -203,8 +203,9 @@ def call_gemini(prompt):
 class AITaskActionView(APIView):
     def post(self, request):
         task_title = request.data.get("task")
+        deadline = request.data.get("deadline")
+        print("oboy", task_title, deadline)
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
-
 
         prompt = f"""
         You are an AI assistant inside a task manager.
@@ -213,6 +214,7 @@ class AITaskActionView(APIView):
 
         Task:
         "{task_title}"
+        Deadline: "{deadline}"
 
         Do the following:
         1. Summarize the task in one short sentence
@@ -232,7 +234,6 @@ class AITaskActionView(APIView):
         }}
 
         Rules:
-        - Do not include any explanation
         - Do not include extra text outside JSON
         - Keep responses concise
         - Be friendly and encouraging
@@ -247,7 +248,10 @@ class AITaskActionView(APIView):
                     model='gemini-2.5-flash', 
                     contents=prompt
                 )
-                print(response.text, response, "heyyy")
+                raw = response.text
+                clean = raw.replace("```json", "").replace("```", "").strip()
+                data = json.loads(clean)
+                print(response.text, data, "heyyy")
 
                 return Response({"reply": response.text})
             except errors.ServerError:
@@ -265,7 +269,7 @@ class AIChatView(APIView):
         message = request.data.get("message")
         print("helo", message)
         prompt = f"""
-        You are Zugo, a helpful assistant in a task manager app.
+        You are Nuel, a helpful assistant in a task manager app.
 
         Rules:
         - Be friendly and encouraging
@@ -276,20 +280,19 @@ class AIChatView(APIView):
         User: {message}
         """
 
-        return Response({"reply": "response.text"})
-        # for attempt in range(3):
-        #     try:
-        #         response = client.models.generate_content(
-        #             model='gemini-2.5-flash', 
-        #             contents=prompt
-        #         )
-        #         print(response.text, response, "heyyy")
+        for attempt in range(3):
+            try:
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash', 
+                    contents=prompt
+                )
+                print(response.text, response, "heyyy")
 
-        #         return Response({"reply": response.text})
-        #     except errors.ServerError:
-        #         if attempt < 2:
-        #             time.sleep(2) # Wait 2 seconds before retrying
-        #             continue
-        #         return Response({"error": "Server busy, try again in a moment"}, status=503)
+                return Response({"reply": response.text})
+            except errors.ServerError:
+                if attempt < 2:
+                    time.sleep(2) # Wait 2 seconds before retrying
+                    continue
+                return Response({"error": "Server busy, try again in a moment"}, status=503)
 
         

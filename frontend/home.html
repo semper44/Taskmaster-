@@ -167,16 +167,31 @@
         <div class="fixed inset-0 flex items-center justify-center z-50">
             <div class="fixed inset-0 bg-black/75"></div>
             <div
+                id="individual-task-modal-content"
                 style="height: 90%;"
                 class="bg-white w-[90%] md:w-[90%] px-3 rounded-lg z-50">               
             <i id="individual-task-modal-close" class="material-icons-outlined text-red-600 float-right cursor-pointer py-4">close</i>
             <div id="task-profile"></div>
-            <p class="cursor-pointer">Summarize</p>
-            <p class="cursor-pointer">Improve</p>
-            <div>
-                <h2>History</h2>
+            <div class="w-full flex flex-col items-center mt-4">
+                <div id="analyze-with-ai" class="cursor-pointer">
+                    <p class="cursor-pointer mb-4">Analyze with AI</p>
+                    <img src="images/gradient.jpg" alt="" class="rounded-full w-[35px] animate-jump">
+                </div>
+                <div id="analyze-with-ai-response" class="hidden">
+                    <img src="images/gradient.jpg" alt="" class="rounded-full w-[35px] animate-jump">
+                    <div id="analyze-with-ai-response-content" class="overflow-y-auto"></div>
+                </div>
+
             </div>
         </div>
+        </div>
+    </div>
+
+    <!-- individual task loading-modal -->
+    <div id="individual-task-loading-modal" class="relative hidden w-full">
+        <div class="fixed inset-0 flex items-center justify-center z-50">
+            <div class="fixed inset-0 bg-black/75"></div>
+            <span id="individual-task-loader" class="loader"></span>
         </div>
     </div>
 
@@ -215,7 +230,7 @@
                             
                             <!-- ai chat body -->
                             <div id="ai-chat-body-parent" class="hidden" style="height: 100vh;">
-                                <div id="ai-chat-body" class="h-[65%] mt-4 w-full flex flex-col w-full" style="overflow-y: auto;">
+                                <div id="ai-chat-body" class="h-[65%] mt-4 md:px-4 w-full flex flex-col w-full" style="overflow-y: auto;">
 
                                 </div>
                                 <!-- input -->

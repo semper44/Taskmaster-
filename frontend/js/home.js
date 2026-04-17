@@ -33,16 +33,13 @@ $(document).ready(function() {
         const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
         let dateDue = "";
-        // let progress = 0;
 
         if (diffDays > 1) {
             dateDue = `In ${diffDays} days`;
         } else if (diffDays === 1) {
             dateDue = "In 1 day";
-            // progress = 90
         } else if (diffDays === 0) {
             dateDue = "Due today";
-            // progress = 100
         } else {
             dateDue = `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) > 1 ? "s" : ""}`;
         }
@@ -193,9 +190,10 @@ $(document).ready(function() {
         .addClass("w-[30px] h-[30px] rounded-full");
 
         // text
-        let titleP = $("<p>").addClass("font-bold").text(title);
-        let dateP = $("<p>").addClass("text-sm text-gray-400").text(date);
+        let titleP = $("<p>").addClass("font-bold").text(title).attr("data-title", title);
+        let dateP = $("<p>").addClass("text-sm text-gray-400").text(date).attr("data-due", date);
         let dueP = $("<p>").addClass("text-sm text-blue-400").text(due);
+        let description = $("<p>").addClass("text-sm text-blue-400").text(due);
 
         // append everything
         let taskProfile = $("#task-profile")
@@ -720,6 +718,33 @@ $(document).ready(function() {
             });
     })
 
+    function scrollToBottom() {
+        const chatBody = document.getElementById('ai-chat-body');
+        chatBody.scrollTo({
+            top: chatBody.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+    function typeWriter(element, text, speed = 30) {
+        let i = 0;
+        element.text(""); // Clear existing content (like the loader)
+        element.removeClass("hidden"); // Ensure it's visible
+
+        function type() {
+            if (i < text.length) {
+                // Append one character at a time
+                element.append(text.charAt(i));
+                i++;
+                // Call itself again after 'speed' milliseconds
+                setTimeout(type, speed);
+            }
+        }
+        type();
+    }
+
+
+
     function displayMessage(userMessage){
         $("#ai-chat-placeholder").hide()
         $("#ai-chat-body-parent").show()
@@ -733,6 +758,7 @@ $(document).ready(function() {
         userResponseDiv.append(userText);
         console.log(userMessage, "userMessage")
         $("#ai-chat-body").append(userResponseDiv);
+        scrollToBottom();
 
         // add a loader to wait for a response from the server
         loader = $("<span>").addClass("loader").attr("id", "ai-chat-spinner")
@@ -741,6 +767,7 @@ $(document).ready(function() {
         loaderAndReplyDIv.append(loader, aiReply);
         imageAndReplyDIv.append(aiImage, loaderAndReplyDIv);
         $("#ai-chat-body").append(imageAndReplyDIv);
+        scrollToBottom();
         // imageAndReplyDIv.append(loader);
         return {"aiReply":aiReply, "loader":loader};
         
@@ -757,9 +784,10 @@ $(document).ready(function() {
             data: JSON.stringify({ message: message }),
 
             success: function (response) {
-                // displayMessage(response.reply);
                 console.log("reply", reply)
-                reply.aiReply.text(response.reply);
+                  // 3. Trigger the typing effect
+                typeWriter(reply.aiReply.last(), response.reply, 25); // 25ms per character
+                // reply.aiReply.text(response.reply);
                 reply.aiReply.show();
                 reply.loader.hide();
                 console.log(response.reply, "response from ai chat", reply)
@@ -807,7 +835,39 @@ $(document).ready(function() {
         }
     });
 
+    // analyze with ai 
+    function analyzeTask(task, taskDeadline) {
+        // reply = displayMessage(message);
 
+        $.ajax({
+            url: `${ENV.API_URL}/tasks/ai-analyze/`,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ task: task, deadline: taskDeadline }),
+
+            success: function (response) {
+                // 3. Trigger the typing effect
+                typeWriter($("#analyze-with-ai-response-content").last(), response.reply, 25); // 25ms per character
+                $("#individual-task-loading-modal").show()
+                console.log(response.reply, "response from ai chat", response)
+            },
+
+            error: function (err) {
+                console.error("Error:", err);
+            }
+        });
+    }
+
+    $("#analyze-with-ai").on("click", function() {
+        $("#individual-task-loading-modal").show()
+        const taskTitle = $(this).closest("#individual-task-modal-content").find("p[data-title]").attr("data-title");
+        const taskDeadline = $(this).closest("#individual-task-modal-content").find("p[data-due]").attr("data-due");
+        console.log("oboy", taskTitle, taskDeadline)
+        // const task = $(this).closest('.task-card').find('p[data-title]').attr('data-title');
+        analyzeTask(taskTitle, taskDeadline)
+    })
+
+ 
     function generateCircles() {
         const container = document.getElementById('shared-dom');
         container.innerHTML = ''; // Clear existing circles
