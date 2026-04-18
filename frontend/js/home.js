@@ -211,6 +211,11 @@ $(document).ready(function() {
     })
     $('#individual-task-modal-close').on('click',function(){
         individualTaskModal.hide()
+        const container = $("#analyze-with-ai-response-content")
+        $("#analyze-with-ai-response").hide()
+        container.addClass("hidden")
+        container.text("")
+        $("#analyze-with-ai").show()
     })
     
    
@@ -730,6 +735,7 @@ $(document).ready(function() {
         let i = 0;
         element.text(""); // Clear existing content (like the loader)
         element.removeClass("hidden"); // Ensure it's visible
+        console.log("typing effect", text, text.length)
 
         function type() {
             if (i < text.length) {
@@ -743,8 +749,51 @@ $(document).ready(function() {
         type();
     }
 
+    function formatAiResponse(data) {
+        console.log("formatting ai response", data.summary, data.data.subtasks)
+        // Gradient style for subheadings
+        const headerClass = "font-bold block text-lg mt-4 bg-gradient-to-r from-[#d8b4fe] to-white bg-clip-text text-transparent";
+        
+        let html = `<p class="text-black ml-2"><span class="${headerClass}">Summary:</span>${data.data.summary}</p>`;
+        
+        html += `<p class="text-black ml-2"><span class="${headerClass}">Improved:</span>${data.data.improved}</p>`;
+        
+        html += `<span class="${headerClass}">Subtasks</span>`;
+        data.data.subtasks.forEach(task => {
+            html += `<p class="text-black ml-2 mt-1">• ${task}</p>`;
+        });
+        
+        return html;
+    }
+
+    // ai analyze typing animation
+    function aiTypeWriterHTML(element, html, speed = 20) {
+        element.html(""); // Clear content
+        element.show();
+        
+        let container = document.createElement('div');
+        container.innerHTML = html;
+        let nodes = Array.from(container.childNodes);
+        let nodeIndex = 0;
+        $("#analyze-with-ai").hide()
+        $("#individual-task-loading-modal").hide()
+        $("#analyze-with-ai-response").css("display", "flex")
+        console.log("nodes", "mosess-bliss")
+
+        function type() {
+            if (nodeIndex < nodes.length) {
+                let node = nodes[nodeIndex].cloneNode(true);
+                element.append(node);
+                nodeIndex++;
+                scrollToBottom();
+                setTimeout(type, speed * 2); // Slightly slower for block elements
+            }
+        }
+        type();
+    }
 
 
+    // inserting ai response and user message into the chat body
     function displayMessage(userMessage){
         $("#ai-chat-placeholder").hide()
         $("#ai-chat-body-parent").show()
@@ -794,12 +843,37 @@ $(document).ready(function() {
             },
 
             error: function (err) {
-                console.error("Error:", err);
+                let message = "Something went wrong";
+                switch (err.status) {
+                    case 400:
+                        message = "Bad request";
+                        break;
+                    case 401:
+                        message = "Unauthorized";
+                        break;
+                    case 403:
+                        message = "Forbidden";
+                        break;
+                    case 404:
+                        message = "Not found";
+                        break;
+                    case 429:
+                        message = "⚠️ AI limit reached. Please try again next day.";
+                        break;
+                    case 500:
+                        message = "AI client error. Try again.";
+                        break;
+                    default:
+                        message = err.responseJSON?.error || message;
+                }
+                console.log("something", message, "went wrong", err)
+                reply.loader.hide();
+                typeWriter(reply.aiReply.last(), message, 25);
             }
         });
     }
 
-
+    // handling send via enter or icon click
     function handleSend(triggerElement) {
         const id = $(triggerElement).attr("id");
         let message;
@@ -835,7 +909,7 @@ $(document).ready(function() {
         }
     });
 
-    // analyze with ai 
+    // analyze with ai api call
     function analyzeTask(task, taskDeadline) {
         // reply = displayMessage(message);
 
@@ -847,13 +921,43 @@ $(document).ready(function() {
 
             success: function (response) {
                 // 3. Trigger the typing effect
-                typeWriter($("#analyze-with-ai-response-content").last(), response.reply, 25); // 25ms per character
-                $("#individual-task-loading-modal").show()
-                console.log(response.reply, "response from ai chat", response)
+                console.log(response.reply, response, "response from ai chat", response.reply.data)
+                const formattedHtml = formatAiResponse(response.reply);
+                const target = $("#analyze-with-ai-response-content");
+                aiTypeWriterHTML(target, formattedHtml, 45); // 25ms per character
+               
             },
 
             error: function (err) {
-                console.error("Error:", err);
+                let message = "Something went wrong";
+                const target = $("#analyze-with-ai-response-content");
+                switch (err.status) {
+                    case 400:
+                        message = "Bad request";
+                        break;
+                    case 401:
+                        message = "Unauthorized";
+                        break;
+                    case 403:
+                        message = "Forbidden";
+                        break;
+                    case 404:
+                        message = "Not found";
+                        break;
+                    case 429:
+                        message = "⚠️ AI limit reached. Please try again next day.";
+                        break;
+                    case 500:
+                        message = "AI client error. Try again.";
+                        break;
+                    default:
+                        message = err.responseJSON?.error || message;
+                }
+                $("#analyze-with-ai").hide()
+                $("#individual-task-loading-modal").hide();
+                $("#analyze-with-ai-response").css("display", "flex")
+                target.removeClass("hidden")
+                typeWriter(target, message, 25);
             }
         });
     }

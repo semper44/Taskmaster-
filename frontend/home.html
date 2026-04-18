@@ -177,9 +177,9 @@
                     <p class="cursor-pointer mb-4">Analyze with AI</p>
                     <img src="images/gradient.jpg" alt="" class="rounded-full w-[35px] animate-jump">
                 </div>
-                <div id="analyze-with-ai-response" class="hidden">
+                <div id="analyze-with-ai-response" class="hidden animate-fade-in items-center justify-center gap-3">
                     <img src="images/gradient.jpg" alt="" class="rounded-full w-[35px] animate-jump">
-                    <div id="analyze-with-ai-response-content" class="overflow-y-auto"></div>
+                    <div id="analyze-with-ai-response-content" class="block"></div>
                 </div>
 
             </div>
@@ -206,13 +206,17 @@
                 class="fixed bg-white w-[90%] md:w-[90%] h-[90%] overflow-hidden rounded-lg z-50 flex">               
                 <div class="w-full h-screen flex">
                     <!-- left history bar     -->
-                        <div style="height: 100vh; overflow-y: auto; border-right-width: 1px;" class="w-[25%] px-3 py-4 h-screen border-r border-r-gray-300">
-                            <h2 id="ai-history" class="text-black lg:block hidden">History</h2>
-                            <i id="expand-history" class="material-icons cursor-pointer text-sm lg:hidden block" style="font-size: 0.85rem; line-height: 1.2rem;">menu</i>
+                        <div style="height: 100vh; overflow-y: auto; border-right-width: 1px;" class="w-[25%] px-3 py-4 md:block hidden h-screen border-r border-r-gray-300">
+                            <h2 id="ai-history" class="text-black">History</h2>
                         </div>
                         <!-- right chat bar -->
-                        <div style="width: 75%;" class="px-3 py-4 h-full">
-                            <i id="ai-chat-modal-close" class="material-icons-outlined text-red-600 float-right cursor-pointer">close</i>
+                        <div class="w-full md:w-[75%] px-3 py-4 h-full">
+                            <div class="flex items-center justify-between">
+                                <div class="md:hidden">
+                                    <i id="expand-history" class="material-icons cursor-pointer">menu</i>
+                                </div>
+                                <i id="ai-chat-modal-close" class="material-icons-outlined text-red-600 float-right cursor-pointer">close</i>
+                            </div>
                             <!-- ai-chat-placeholder -->
                             <div id="ai-chat-placeholder" class="flex flex-col h-[80%] w-full justify-center items-center" style="height: 80%;">
                                 <h1 class="text-black"><span id="gradient-text" class="bg-gradient-to-r from-[#be9ee2] to-white bg-clip-text text-transparent font-bold">Hy Dear</span> This is an AI assited chat</h1>
@@ -301,7 +305,7 @@
                 <!-- insights -->
                 <div class="insights mt-8 ml-4 ">
                     <p class="mt-4 mb-4 text-black">Insights</p>
-                    <div class="w-full flex gap-2 items-center justify-center ">
+                    <div class="w-full flex gap-2 items-center">
                         <i class="material-icons-outlined">chat</i>
                         <p>Inbox</p>
                         <div class="w-[25px] h-[25px] bg-red-400 rounded-full flex items-center justify-center">

@@ -1,6 +1,7 @@
 import json
 from pyexpat import model
 
+from .custom_throttle import AIChatThrottle
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import Taskapi 
@@ -201,54 +202,40 @@ def call_gemini(prompt):
 
 
 class AITaskActionView(APIView):
+    throttle_classes = [AIChatThrottle]
+
     def post(self, request):
+        # return Response({"reply": {
+        #     "data": {
+        #         "summary": "The task involves managing laundry, from collecting dirty items to washing, drying, and folding them.",
+        #         "improved": "Wash, dry, fold, and put away all laundry by October 11, 2021.",
+        #         "subtasks": [
+        #             "Gather all dirty clothes and linens.",
+        #             "Sort laundry by color and fabric type.",
+        #             "Wash clothes using appropriate settings and detergent.",
+        #             "Dry clothes thoroughly according to fabric care labels.",
+        #             "Fold and put away all clean laundry."
+        #         ]
+        #     }
+        # }})
         task_title = request.data.get("task")
         deadline = request.data.get("deadline")
         print("oboy", task_title, deadline)
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
         prompt = f"""
-        You are an AI assistant inside a task manager.
+            Task: "{task_title}"
+            Deadline: "{deadline}"
 
-        Your job is to analyze a task and return structured output.
+            Return JSON only:
+            {{
+            "summary": "short summary",
+            "improved": "clear actionable task",
+            "subtasks": ["step 1", "step 2", "step 3"]
+            }}
 
-        Task:
-        "{task_title}"
-<<<<<<< HEAD
-=======
-        Deadline: "{deadline}"
->>>>>>> e37d7acd8c1297adb7a0fe3dc65428326a8c80df
-
-        Do the following:
-        1. Summarize the task in one short sentence
-        2. Improve the task to make it clear and actionable
-        3. Break the task into small actionable subtasks
-
-        Return ONLY valid JSON in this format:
-
-        {{
-        "summary": "short summary",
-        "improved": "clear and actionable version",
-        "subtasks": [
-            "step 1",
-            "step 2",
-            "step 3"
-        ]
-        }}
-
-        Rules:
-<<<<<<< HEAD
-        - Do not include any explanation
-=======
->>>>>>> e37d7acd8c1297adb7a0fe3dc65428326a8c80df
-        - Do not include extra text outside JSON
-        - Keep responses concise
-        - Be friendly and encouraging
-        - Explain concepts simply
-        - Address the user by their name when possible
-        - Do not go beyond giving advice related to task management and productivity
-        """
-
+            Max 5 subtasks. No extra text.
+            """
         for attempt in range(3):
             try:
                 response = client.models.generate_content(
@@ -293,16 +280,14 @@ class AITaskActionView(APIView):
 
 
 class AIChatView(APIView):
+    throttle_classes = [AIChatThrottle]
+
     def post(self, request):
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         message = request.data.get("message")
         print("helo", message)
         prompt = f"""
-<<<<<<< HEAD
-        You are Zugo, a helpful assistant in a task manager app.
-=======
         You are Nuel, a helpful assistant in a task manager app.
->>>>>>> e37d7acd8c1297adb7a0fe3dc65428326a8c80df
 
         Rules:
         - Be friendly and encouraging
@@ -313,9 +298,23 @@ class AIChatView(APIView):
         User: {message}
         """
 
+        # return Response({"reply": {
+        #             "data": {
+        #                 "summary": "The task involves managing laundry, from collecting dirty items to washing, drying, and folding them.",
+        #                 "improved": "Wash, dry, fold, and put away all laundry by October 11, 2021.",
+        #                 "subtasks": [
+        #                     "Gather all dirty clothes and linens.",
+        #                     "Sort laundry by color and fabric type.",
+        #                     "Wash clothes using appropriate settings and detergent.",
+        #                     "Dry clothes thoroughly according to fabric care labels.",
+        #                     "Fold and put away all clean laundry."
+        #                 ]
+        #             }
+        #         }})
+
         for attempt in range(3):
             try:
-                response = client.models.generate_content(
+                response = client.models(
                     model='gemini-2.5-flash', 
                     contents=prompt
                 )
