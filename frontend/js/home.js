@@ -754,12 +754,12 @@ $(document).ready(function() {
         // Gradient style for subheadings
         const headerClass = "font-bold block text-lg mt-4 bg-gradient-to-r from-[#d8b4fe] to-white bg-clip-text text-transparent";
         
-        let html = `<p class="text-black ml-2"><span class="${headerClass}">Summary:</span>${summary}</p>`;
+        let html = `<p class="text-black ml-2"><span class="${headerClass}">Summary:</span>${data.summary}</p>`;
         
-        html += `<p class="text-black ml-2"><span class="${headerClass}">Improved:</span>${improved}</p>`;
+        html += `<p class="text-black ml-2"><span class="${headerClass}">Improved:</span>${data.improved}</p>`;
         
         html += `<span class="${headerClass}">Subtasks</span>`;
-        subtasks.forEach(task => {
+        data.subtasks.forEach(task => {
             html += `<p class="text-black ml-2 mt-1">• ${task}</p>`;
         });
         
