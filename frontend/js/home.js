@@ -750,7 +750,7 @@ $(document).ready(function() {
     }
 
     function formatAiResponse(data) {
-        console.log("formatting ai response", data.summary, data.data.subtasks)
+        console.log("formatting ai response", data)
         // Gradient style for subheadings
         const headerClass = "font-bold block text-lg mt-4 bg-gradient-to-r from-[#d8b4fe] to-white bg-clip-text text-transparent";
         
@@ -921,7 +921,7 @@ $(document).ready(function() {
 
             success: function (response) {
                 // 3. Trigger the typing effect
-                console.log(response.reply, response, "response from ai chat", response.reply.data)
+                console.log(response.reply, response, "response from ai chat")
                 const formattedHtml = formatAiResponse(response.reply);
                 const target = $("#analyze-with-ai-response-content");
                 aiTypeWriterHTML(target, formattedHtml, 45); // 25ms per character
