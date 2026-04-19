@@ -316,7 +316,7 @@ class AIChatView(APIView):
 
         for attempt in range(3):
             try:
-                response = client.models(
+                response = client.models.generate_content(
                     model='gemini-2.5-flash', 
                     contents=prompt
                 )
