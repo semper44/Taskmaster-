@@ -207,77 +207,77 @@ class AITaskActionView(APIView):
     throttle_classes = [AIChatThrottle]
 
     def post(self, request):
-        # return Response({"reply": {
-        #     "data": {
-        #         "summary": "The task involves managing laundry, from collecting dirty items to washing, drying, and folding them.",
-        #         "improved": "Wash, dry, fold, and put away all laundry by October 11, 2021.",
-        #         "subtasks": [
-        #             "Gather all dirty clothes and linens.",
-        #             "Sort laundry by color and fabric type.",
-        #             "Wash clothes using appropriate settings and detergent.",
-        #             "Dry clothes thoroughly according to fabric care labels.",
-        #             "Fold and put away all clean laundry."
-        #         ]
-        #     }
-        # }})
-        task_title = request.data.get("task")
-        deadline = request.data.get("deadline")
-        print("oboy", task_title, deadline)
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        return Response({"data": {
+                "summary": "The task involves managing laundry, from collecting dirty items to washing, drying, and folding them.",
+                "improved": "Wash, dry, fold, and put away all laundry by October 11, 2021.",
+                "subtasks": [
+                    "Gather all dirty clothes and linens.",
+                    "Sort laundry by color and fabric type.",
+                    "Wash clothes using appropriate settings and detergent.",
+                    "Dry clothes thoroughly according to fabric care labels.",
+                    "Fold and put away all clean laundry."
+                ]
+            }
+        })
+        
+        # task_title = request.data.get("task")
+        # deadline = request.data.get("deadline")
+        # print("oboy", task_title, deadline)
+        # client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-        prompt = f"""
-            Task: "{task_title}"
-            Deadline: "{deadline}"
+        # prompt = f"""
+        #     Task: "{task_title}"
+        #     Deadline: "{deadline}"
 
-            Return JSON only:
-            {{
-            "summary": "short summary",
-            "improved": "clear actionable task",
-            "subtasks": ["step 1", "step 2", "step 3"]
-            }}
+        #     Return JSON only:
+        #     {{
+        #     "summary": "short summary",
+        #     "improved": "clear actionable task",
+        #     "subtasks": ["step 1", "step 2", "step 3"]
+        #     }}
 
-            Max 5 subtasks. No extra text.
-            """
-        for attempt in range(3):
-            try:
-                response = client.models.generate_content(
-                    model='gemini-2.5-flash', 
-                    contents=prompt
-                )
-                raw = response.text
-                clean = raw.replace("```json", "").replace("```", "").strip()
-                data = json.loads(clean)
-                print(response.text, data, "heyyy")
+        #     Max 5 subtasks. No extra text.
+        #     """
+        # for attempt in range(3):
+        #     try:
+        #         response = client.models.generate_content(
+        #             model='gemini-2.5-flash', 
+        #             contents=prompt
+        #         )
+        #         raw = response.text
+        #         clean = raw.replace("```json", "").replace("```", "").strip()
+        #         data = json.loads(clean)
+        #         print(response.text, data, "heyyy")
 
-                return Response({"data": data})
-            except errors.ClientError as e:
-                # Handle quota / rate limit
-                if "RESOURCE_EXHAUSTED" in str(e):
-                    return Response(
-                        {"error": "AI limit reached. Please wait a moment."},
-                        status=429
-                    )
+        #         return Response({"data": data})
+        #     except errors.ClientError as e:
+        #         # Handle quota / rate limit
+        #         if "RESOURCE_EXHAUSTED" in str(e):
+        #             return Response(
+        #                 {"error": "AI limit reached. Please wait a moment."},
+        #                 status=429
+        #             )
 
-                return Response(
-                    {"error": "AI client error", "details": str(e)},
-                    status=500
-                )
+        #         return Response(
+        #             {"error": "AI client error", "details": str(e)},
+        #             status=500
+        #         )
 
-            except json.JSONDecodeError:
-                return Response(
-                    {"error": "Invalid AI response format"},
-                    status=500
-                )
+        #     except json.JSONDecodeError:
+        #         return Response(
+        #             {"error": "Invalid AI response format"},
+        #             status=500
+        #         )
 
-            except Exception as e:
-                if attempt < 2:
-                    time.sleep(2)
-                    continue
+        #     except Exception as e:
+        #         if attempt < 2:
+        #             time.sleep(2)
+        #             continue
 
-                return Response(
-                    {"error": "Unexpected error", "details": str(e)},
-                    status=500
-                )
+        #         return Response(
+        #             {"error": "Unexpected error", "details": str(e)},
+        #             status=500
+        #         )
 
 
 

@@ -754,12 +754,12 @@ $(document).ready(function() {
         // Gradient style for subheadings
         const headerClass = "font-bold block text-lg mt-4 bg-gradient-to-r from-[#d8b4fe] to-white bg-clip-text text-transparent";
         
-        let html = `<p class="text-black ml-2"><span class="${headerClass}">Summary:</span>${data.data.summary}</p>`;
+        let html = `<p class="text-black ml-2"><span class="${headerClass}">Summary:</span>${summary}</p>`;
         
-        html += `<p class="text-black ml-2"><span class="${headerClass}">Improved:</span>${data.data.improved}</p>`;
+        html += `<p class="text-black ml-2"><span class="${headerClass}">Improved:</span>${improved}</p>`;
         
         html += `<span class="${headerClass}">Subtasks</span>`;
-        data.data.subtasks.forEach(task => {
+        subtasks.forEach(task => {
             html += `<p class="text-black ml-2 mt-1">• ${task}</p>`;
         });
         
@@ -921,8 +921,8 @@ $(document).ready(function() {
 
             success: function (response) {
                 // 3. Trigger the typing effect
-                console.log(response.reply, response, "response from ai chat")
-                const formattedHtml = formatAiResponse(response.reply);
+                console.log(response.data, response, "response from ai chat")
+                const formattedHtml = formatAiResponse(response.data);
                 const target = $("#analyze-with-ai-response-content");
                 aiTypeWriterHTML(target, formattedHtml, 45); // 25ms per character
                
