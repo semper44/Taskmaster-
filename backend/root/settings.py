@@ -204,7 +204,14 @@ GEMINI_API_KEY = config("GEMINI_API_KEY")
 
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
-        'ai_chat': '2/min', 
+        'ai_chat': '2/day', 
     }
         
 }
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+#         "LOCATION": "unique-ai-throttle",
+#     }
+# }
