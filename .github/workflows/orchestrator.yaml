@@ -16,6 +16,9 @@ jobs:
   # JOB 1: PYTEST RUNNER
   # =========================================================================
   
+    # =========================================================================
+  # JOB 1: PYTEST RUNNER (Dynamic & Scalable)
+  # =========================================================================
   run-pytest:
     runs-on: ubuntu-latest
     if: contains(fromJson(inputs.tools_list), 'pytest')
@@ -28,16 +31,44 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install django djangorestframework pytest pytest-django pytest-json-report pytest-cov
-      - name: Run Pytest
-        env:
-          # Change "backend" below if your configuration module has a different name
-          DJANGO_SETTINGS_MODULE: backend.settings 
+      - name: Auto-Discover and Run Pytest
         run: |
-          echo "===first OUTPUT_START ==="
-          # Run pytest explicitly targeting the backend directory
-          pytest backend/ --json-report --json-report-file=report.json --cov=backend/ --cov-report=json || true
+          echo "=== OUTPUT_START ==="
+          
+          # 1. Dynamically locate manage.py
+          MANAGE_PY_PATH=$(find . -name "manage.py" | head -n 1)
+          
+          if [ -z "$MANAGE_PY_PATH" ]; then
+            echo "Error: No manage.py found in the repository. Standard pytest execution..."
+            pytest --json-report --json-report-file=report.json --cov=. --cov-report=json || true
+          else
+            # 2. Extract the directory containing manage.py
+            PROJECT_DIR=$(dirname "$MANAGE_PY_PATH")
+            echo "Found Django project root at: $PROJECT_DIR"
+            
+            # 3. Parse manage.py to find the actual DJANGO_SETTINGS_MODULE
+            SETTINGS_MOD=$(grep -oE "['\"][a-zA-Z0-9_\.]+\.settings['\"]" "$MANAGE_PY_PATH" | tr -d "'\"" | head -n 1)
+            
+            if [ -z "$SETTINGS_MOD" ]; then
+               # Fallback guessing if not found via regex
+               SETTINGS_DIR=$(find "$PROJECT_DIR" -name "settings.py" | head -n 1)
+               SETTINGS_MOD=$(echo "$SETTINGS_DIR" | sed "s|^$PROJECT_DIR/||" | sed 's|/|.|g' | sed 's|\.py$||')
+            fi
+            echo "Detected Django settings module: $SETTINGS_MOD"
+            
+            # 4. Export paths dynamically relative to the found project
+            export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
+            export DJANGO_SETTINGS_MODULE="$SETTINGS_MOD"
+            
+            # 5. Run pytest recursively targeting the discovered root
+            pytest "$PROJECT_DIR" --json-report --json-report-file=report.json --cov="$PROJECT_DIR" --cov-report=json || true
+          fi
+          
           tail -c 2000 report.json || true
           echo "=== OUTPUT_END ==="
+
+
+
 
   # run-pytest:
   #   runs-on: ubuntu-latest
