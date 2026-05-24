@@ -19,62 +19,123 @@ jobs:
   # =========================================================================
   # JOB 1: PYTEST RUNNER
   # =========================================================================
-  
   run-pytest:
     runs-on: ubuntu-latest
-    timeout-minutes: 10 # PRODUCTION PRO-TIP: Prevents infinite loops from consuming billing credits
+    timeout-minutes: 10
+
     if: contains(fromJson(inputs.tools_list), 'pytest')
-    
+
     permissions:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          # persist-credentials: false
-          python-version: '3.11'
-      - name: Install Pytest & Dependencies
+          python-version: "3.11"
+
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install django djangorestframework pytest pytest-django pytest-json-report pytest-cov
-      - name: Auto-Discover and Run Pytest
-        run: |
-          echo "=== OUTPUT_START ==="
-          
-          # 1. Dynamically locate manage.py
-          MANAGE_PY_PATH=$(find . -name "manage.py" | head -n 1)
-          
-          if [ -z "$MANAGE_PY_PATH" ]; then
-            echo "Error: No manage.py found in the repository. Standard pytest execution..."
-            pytest --json-report --json-report-file=report.json --cov=. --cov-report=json || true
-          else
-            # 2. Extract the directory containing manage.py
-            PROJECT_DIR=$(dirname "$MANAGE_PY_PATH")
-            echo "Found Django project root at: $PROJECT_DIR"
-            
-            # 3. Parse manage.py to find the actual DJANGO_SETTINGS_MODULE
-            SETTINGS_MOD=$(grep -oE "['\"][a-zA-Z0-9_\.]+\.settings['\"]" "$MANAGE_PY_PATH" | tr -d "'\"" | head -n 1)
-            
-            if [ -z "$SETTINGS_MOD" ]; then
-               # Fallback guessing if not found via regex
-               SETTINGS_DIR=$(find "$PROJECT_DIR" -name "settings.py" | head -n 1)
-               SETTINGS_MOD=$(echo "$SETTINGS_DIR" | sed "s|^$PROJECT_DIR/||" | sed 's|/|.|g' | sed 's|\.py$||')
-            fi
-            echo "Detected Django settings module: $SETTINGS_MOD"
-            
-            # 4. Export paths dynamically relative to the found project
-            export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
-            export DJANGO_SETTINGS_MODULE="$SETTINGS_MOD"
-            
-            # 5. Run pytest recursively targeting the discovered root
-            pytest "$PROJECT_DIR" --json-report --json-report-file=report.json --cov="$PROJECT_DIR" --cov-report=json || true
+
+          # --------------------------------------------------
+          # Customer project dependencies
+          # --------------------------------------------------
+
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
           fi
-          
-          tail -c 2000 report.json || true
+
+          # --------------------------------------------------
+          # Odozi-required tooling
+          # --------------------------------------------------
+
+          pip install \
+            pytest \
+            pytest-django \
+            pytest-json-report \
+            pytest-cov
+
+      - name: Auto Discover and Execute Pytest
+        shell: bash
+        run: |
+
+          echo "=== OUTPUT_START ==="
+
+          TEST_EXIT_CODE=0
+
+          # --------------------------------------------------
+          # Locate Django project if present
+          # --------------------------------------------------
+
+          MANAGE_PY=$(find . -name "manage.py" | head -n 1)
+
+          if [ -n "$MANAGE_PY" ]; then
+
+            PROJECT_DIR=$(dirname "$MANAGE_PY")
+
+            echo "Detected Django project:"
+            echo "$PROJECT_DIR"
+
+            export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
+
+            SETTINGS_FILE=$(find "$PROJECT_DIR" -name "settings.py" | head -n 1)
+
+            if [ -n "$SETTINGS_FILE" ]; then
+
+              SETTINGS_MODULE=$(
+                echo "$SETTINGS_FILE" \
+                | sed 's|^\./||' \
+                | sed 's|/|.|g' \
+                | sed 's|\.py$||'
+              )
+
+              export DJANGO_SETTINGS_MODULE="$SETTINGS_MODULE"
+
+              echo "DJANGO_SETTINGS_MODULE=$SETTINGS_MODULE"
+            fi
+
+            echo ""
+            echo "Collected tests:"
+            pytest "$PROJECT_DIR" --collect-only || true
+
+            pytest "$PROJECT_DIR" \
+              --json-report \
+              --json-report-file=report.json \
+              --cov="$PROJECT_DIR" \
+              --cov-report=json \
+              || TEST_EXIT_CODE=$?
+
+          else
+
+            echo "No Django project detected."
+
+            echo ""
+            echo "Collected tests:"
+            pytest --collect-only || true
+
+            pytest \
+              --json-report \
+              --json-report-file=report.json \
+              --cov=. \
+              --cov-report=json \
+              || TEST_EXIT_CODE=$?
+
+          fi
+
+          echo ""
+          echo "---- JSON REPORT TAIL ----"
+
+          tail -c 5000 report.json || true
+
+          echo ""
           echo "=== OUTPUT_END ==="
 
-
+          exit $TEST_EXIT_CODE
 
 
   # run-pytest:
