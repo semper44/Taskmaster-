@@ -39,27 +39,28 @@ jobs:
           tail -c 2000 report.json || true
           echo "=== OUTPUT_END ==="
 
-  run-pytest:
-    runs-on: ubuntu-latest
-    if: contains(fromJson(inputs.tools_list), 'pytest')
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install Pytest & Dependencies
-        run: pip install django djangorestframework pytest pytest-json-report pytest-cov
-      - name: Run Pytest
-        # env:
-        #   PYTEST_ADDOPTS: "-c /dev/null"
-        run: |
-          echo "=== OUTPUT_START ==="
-           pwd
-          find . -name "test*.py"
-          pytest --collect-only
-          pytest --json-report --json-report-file=report.json --cov=. --cov-report=json || true
-          tail -c 2000 report.json || true
-          echo "=== OUTPUT_END ==="
+  # run-pytest:
+  #   runs-on: ubuntu-latest
+  #   if: contains(fromJson(inputs.tools_list), 'pytest')
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.11'
+  #     - name: Install Pytest & Dependencies
+  #       run: pip install django djangorestframework pytest pytest-json-report pytest-cov
+  #     - name: Run Pytest
+  #       # env:
+  #       #   PYTEST_ADDOPTS: "-c /dev/null"
+  #       run: |
+  #         echo "=== OUTPUT_START ==="
+  #          pwd
+  #         find . -name "test*.py"
+  #         pytest --collect-only
+  #         pytest --json-report --json-report-file=report.json --cov=. --cov-report=json || true
+  #         tail -c 2000 report.json || true
+  #         echo "=== OUTPUT_END ==="
+
 
   # =========================================================================
   # JOB 2: RUFF RUNNER
