@@ -11,21 +11,28 @@ on:
         type: string
         default: ''
 
+# PRODUCTION SECURITY: Set global permissions to read-only
+permissions:
+  contents: read
+
 jobs:
   # =========================================================================
   # JOB 1: PYTEST RUNNER
   # =========================================================================
   
-    # =========================================================================
-  # JOB 1: PYTEST RUNNER (Dynamic & Scalable)
-  # =========================================================================
   run-pytest:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # PRODUCTION PRO-TIP: Prevents infinite loops from consuming billing credits
     if: contains(fromJson(inputs.tools_list), 'pytest')
+    
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
+          # persist-credentials: false
           python-version: '3.11'
       - name: Install Pytest & Dependencies
         run: |
