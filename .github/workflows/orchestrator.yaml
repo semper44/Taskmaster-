@@ -1,5 +1,3 @@
-name: Agentic Mixed Orchestration Suite
-
 on:
   workflow_dispatch:
     inputs:
@@ -14,65 +12,83 @@ on:
         default: ''
 
 jobs:
-  execute-pipeline:
+  # =========================================================================
+  # JOB 1: PYTEST RUNNER
+  # =========================================================================
+  run-pytest:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        tool: ${{ fromJSON(inputs.tools_list) }}
-
+    if: contains(fromJson(inputs.tools_list), 'pytest')
     steps:
-      - name: Check out repo code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Install Eco-System Tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install django djangorestframework pytest pytest-json-report pytest-cov ruff bandit
-
-      # =========================================================================
-      # LAYER A: STANDARD OUT-OF-THE-BOX CLI TOOLS
-      # =========================================================================
+      - name: Install Pytest & Dependencies
+        run: pip install django djangorestframework pytest pytest-json-report pytest-cov
       - name: Run Pytest
-        if: matrix.tool == 'pytest'
-        env:
-          PYTEST_ADDOPTS: "-c /dev/null"
+        # env:
+        #   PYTEST_ADDOPTS: "-c /dev/null"
         run: |
           echo "=== OUTPUT_START ==="
+           pwd
+          find . -name "test*.py"
+          pytest --collect-only
           pytest --json-report --json-report-file=report.json --cov=. --cov-report=json || true
           tail -c 2000 report.json || true
           echo "=== OUTPUT_END ==="
 
+  # =========================================================================
+  # JOB 2: RUFF RUNNER
+  # =========================================================================
+  run-ruff:
+    runs-on: ubuntu-latest
+    if: contains(fromJson(inputs.tools_list), 'ruff')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Ruff
+        run: pip install ruff
       - name: Run Ruff Linter
-        if: matrix.tool == 'ruff'
         run: |
           echo "=== OUTPUT_START ==="
           ruff check --output-format json . || true
           echo "=== OUTPUT_END ==="
 
+  # =========================================================================
+  # JOB 3: BANDIT RUNNER
+  # =========================================================================
+  run-bandit:
+    runs-on: ubuntu-latest
+    if: contains(fromJson(inputs.tools_list), 'bandit')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Bandit
+        run: pip install bandit
       - name: Run Bandit Security
-        if: matrix.tool == 'bandit'
         run: |
           echo "=== OUTPUT_START ==="
           bandit -r . -lll -f json || true
           echo "=== OUTPUT_END ==="
 
-      # =========================================================================
-      # LAYER B: CUSTOM Python/AST CODES
-      # =========================================================================
+  # =========================================================================
+  # JOB 4: ODOZI RUNNER
+  # =========================================================================
+  run-odozi:
+    runs-on: ubuntu-latest
+    if: contains(fromJson(fromJson(inputs.tools_list)), 'odozi_visitors')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - name: Run Custom Odozi Code Engine
-        if: matrix.tool == 'odozi_visitors'
         run: |
-          # 1. Write the payload string from the API directly into a runner script
-          echo "${{ inputs.custom_script_payload }}" > odozi_runner.py
-          
-          # 2. Execute it natively with standard Python
+          echo '${{ inputs.custom_script_payload }}' | base64 -d > odozi_runner.py
           echo "=== OUTPUT_START ==="
-          python odozi_runner.py || true
+          python odozi_runner.py
           echo "=== OUTPUT_END ==="
