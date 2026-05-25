@@ -5,7 +5,7 @@ on:
         description: 'JSON matrix array'
         required: true
         type: string # Example: '["pytest", "ruff", "bandit", "odozi_visitors"]'
-        backend_url:
+      backend_url:
         description: 'https://angry-views-relate.loca.lt'
         required: true
         default: 'https://your-production-api.com' # Fallback to prod default
@@ -72,9 +72,8 @@ jobs:
         run: echo $PYTHONPATH
              echo $DJANGO_SETTINGS_MODULE
 
-      - name: Auto Discover and Execute Pytest
-        shell: bash
       - name: Auto-Discover, Run & Stream Pytest in Chunks
+        shell: bash
         run: |
           echo "=== OUTPUT_START ==="
           MANAGE_PY_PATH=$(find . -name "manage.py" | head -n 1)
