@@ -98,7 +98,7 @@ jobs:
           import sys, urllib.request, json, time
           buffer = []
           last_flush = time.time()
-          url = '${{ inputs.backend_url }}/dashboard/results'
+          url = '${{ inputs.backend_url }}/dashboard/results/'
           headers = {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'}
           
           def flush():
@@ -125,7 +125,7 @@ jobs:
         if: always()
         run: |
           if [ -f "report.json" ]; then
-            curl -X POST "${{ inputs.backend_url }}/dashboard/results" -F "run_id=${{ github.run_id }}" -F "repo=${{ github.repository }}" -F "tool=pytest" -F "file=@report.json"
+            curl -X POST "${{ inputs.backend_url }}/dashboard/results/" -F "run_id=${{ github.run_id }}" -F "repo=${{ github.repository }}" -F "tool=pytest" -F "file=@report.json"
           fi
           exit ${{ env.TEST_EXIT_CODE }}
 
@@ -175,7 +175,7 @@ jobs:
           ruff check --output-format json .  > ruff_report.json || true
           cat ruff_report.json
           
-          curl -X POST "${{ inputs.backend_url }}/dashboard/results" \
+          curl -X POST "${{ inputs.backend_url }}/dashboard/results/" \
             -H "bypass-tunnel-reminder: true" \
             -F "run_id=${{ github.run_id }}" \
             -F "repo=${{ github.repository }}" \
@@ -202,7 +202,7 @@ jobs:
           bandit -r . -lll -f json  > bandit_report.json || true
           cat bandit_report.json
           
-          curl -X POST "${{ inputs.backend_url }}/dashboard/results" \
+          curl -X POST "${{ inputs.backend_url }}/dashboard/results/" \
             -H "bypass-tunnel-reminder: true" \
             -F "run_id=${{ github.run_id }}" \
             -F "repo=${{ github.repository }}" \
@@ -228,7 +228,7 @@ jobs:
           python odozi_runner.py > odozi_report.json || true
           cat odozi_report.json
           
-          curl -X POST "${{ inputs.backend_url }}/dashboard/results" \
+          curl -X POST "${{ inputs.backend_url }}/dashboard/results/" \
             -H "bypass-tunnel-reminder: true" \
             -F "run_id=${{ github.run_id }}" \
             -F "repo=${{ github.repository }}" \
