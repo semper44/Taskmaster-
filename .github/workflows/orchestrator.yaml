@@ -5,6 +5,10 @@ on:
         description: 'JSON matrix array'
         required: true
         type: string # Example: '["pytest", "ruff", "bandit", "odozi_visitors"]'
+        backend_url:
+        description: 'https://angry-views-relate.loca.lt'
+        required: true
+        default: 'https://your-production-api.com' # Fallback to prod default
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -32,6 +36,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -68,81 +74,60 @@ jobs:
 
       - name: Auto Discover and Execute Pytest
         shell: bash
+      - name: Auto-Discover, Run & Stream Pytest in Chunks
         run: |
-
           echo "=== OUTPUT_START ==="
-
-          TEST_EXIT_CODE=0
-
-          # --------------------------------------------------
-          # Locate Django project if present
-          # --------------------------------------------------
-
-          MANAGE_PY=$(find . -name "manage.py" | head -n 1)
-
-          if [ -n "$MANAGE_PY" ]; then
-
-            PROJECT_DIR=$(dirname "$MANAGE_PY")
-
-            echo "Detected Django project:"
-            echo "$PROJECT_DIR"
-
-            export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
-
-            SETTINGS_FILE=$(find "$PROJECT_DIR" -name "settings.py" | head -n 1)
-
-            if [ -n "$SETTINGS_FILE" ]; then
-
-              SETTINGS_MODULE=$(
-                echo "$SETTINGS_FILE" \
-                | sed 's|^\./||' \
-                | sed 's|/|.|g' \
-                | sed 's|\.py$||'
-              )
-
-              export DJANGO_SETTINGS_MODULE="$SETTINGS_MODULE"
-
-              echo "DJANGO_SETTINGS_MODULE=$SETTINGS_MODULE"
-            fi
-
-            echo ""
-            echo "Collected tests:"
-            pytest "$PROJECT_DIR" --collect-only || true
-
-            pytest "$PROJECT_DIR" \
-              --json-report \
-              --json-report-file=report.json \
-              --cov="$PROJECT_DIR" \
-              --cov-report=json \
-              || TEST_EXIT_CODE=$?
-
+          MANAGE_PY_PATH=$(find . -name "manage.py" | head -n 1)
+          if [ -z "$MANAGE_PY_PATH" ]; then
+            RUN_CMD="pytest --json-report --json-report-file=report.json --cov=. --cov-report=json"
           else
-
-            echo "No Django project detected."
-
-            echo ""
-            echo "Collected tests:"
-            pytest --collect-only || true
-
-            pytest \
-              --json-report \
-              --json-report-file=report.json \
-              --cov=. \
-              --cov-report=json \
-              || TEST_EXIT_CODE=$?
-
+            PROJECT_DIR=$(dirname "$MANAGE_PY_PATH")
+            if [ -f "$PROJECT_DIR/requirements.txt" ]; then pip install -r "$PROJECT_DIR/requirements.txt"; fi
+            SETTINGS_MOD=$(grep -oE "['\"][a-zA-Z0-9_\.]+\.settings['\"]" "$MANAGE_PY_PATH" | tr -d "'\"" | head -n 1)
+            if [ -z "$SETTINGS_MOD" ]; then
+               SETTINGS_DIR=$(find "$PROJECT_DIR" -name "settings.py" | head -n 1)
+               SETTINGS_MOD=$(echo "$SETTINGS_DIR" | sed "s|^$PROJECT_DIR/||" | sed 's|/|.|g' | sed 's|\.py$||')
+            fi
+            export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
+            export DJANGO_SETTINGS_MODULE="$SETTINGS_MOD"
+            RUN_CMD="pytest $PROJECT_DIR --json-report --json-report-file=report.json --cov=$PROJECT_DIR --cov-report=json"
           fi
+          
+          # Inline Python script buffers output into 2-second or 20-line chunks
+          python -c "
+          import sys, urllib.request, json, time
+          buffer = []
+          last_flush = time.time()
+          url = '${{ inputs.backend_url }}/dashboard/results'
+          headers = {'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true'}
+          
+          def flush():
+              global buffer, last_flush
+              if not buffer: return
+              payload = {'run_id': '${{ github.run_id }}', 'tool': 'pytest', 'logs': buffer}
+              try:
+                  req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers, method='POST')
+                  with urllib.request.urlopen(req, timeout=5) as response: pass
+              except Exception as e: sys.stderr.write(f'Flush failed: {e}\n')
+              buffer, last_flush = [], time.time()
 
-          echo ""
-          echo "---- JSON REPORT TAIL ----"
+          for line in sys.stdin:
+              sys.stdout.write(line)
+              buffer.append(line.strip())
+              if len(buffer) >= 20 or (time.time() - last_flush) > 2.0: flush()
+          flush()
+          " < <($RUN_CMD 2>&1)
 
-          tail -c 5000 report.json || true
-
-          echo ""
+          echo "TEST_EXIT_CODE=${PIPESTATUS}" >> $GITHUB_ENV
           echo "=== OUTPUT_END ==="
 
-          exit $TEST_EXIT_CODE
-
+      - name: Send Final Pytest Structured Report
+        if: always()
+        run: |
+          if [ -f "report.json" ]; then
+            curl -X POST "${{ inputs.backend_url }}/dashboard/results" -F "run_id=${{ github.run_id }}" -F "repo=${{ github.repository }}" -F "tool=pytest" -F "file=@report.json"
+          fi
+          exit ${{ env.TEST_EXIT_CODE }}
 
   # run-pytest:
   #   runs-on: ubuntu-latest
@@ -172,7 +157,11 @@ jobs:
   # =========================================================================
   run-ruff:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: contains(fromJson(inputs.tools_list), 'ruff')
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -183,7 +172,15 @@ jobs:
       - name: Run Ruff Linter
         run: |
           echo "=== OUTPUT_START ==="
-          ruff check --output-format json . || true
+          ruff check --output-format json .  > ruff_report.json || true
+          cat ruff_report.json
+          
+          curl -X POST "${{ inputs.backend_url }}/dashboard/results" \
+            -H "bypass-tunnel-reminder: true" \
+            -F "run_id=${{ github.run_id }}" \
+            -F "repo=${{ github.repository }}" \
+            -F "tool=ruff" \
+            -F "file=@ruff_report.json"
           echo "=== OUTPUT_END ==="
 
   # =========================================================================
@@ -202,7 +199,15 @@ jobs:
       - name: Run Bandit Security
         run: |
           echo "=== OUTPUT_START ==="
-          bandit -r . -lll -f json || true
+          bandit -r . -lll -f json  > bandit_report.json || true
+          cat bandit_report.json
+          
+          curl -X POST "${{ inputs.backend_url }}/dashboard/results" \
+            -H "bypass-tunnel-reminder: true" \
+            -F "run_id=${{ github.run_id }}" \
+            -F "repo=${{ github.repository }}" \
+            -F "tool=bandit" \
+            -F "file=@bandit_report.json"
           echo "=== OUTPUT_END ==="
 
   # =========================================================================
@@ -220,5 +225,15 @@ jobs:
         run: |
           echo '${{ inputs.custom_script_payload }}' | base64 -d > odozi_runner.py
           echo "=== OUTPUT_START ==="
-          python odozi_runner.py
+          python odozi_runner.py > odozi_report.json || true
+          cat odozi_report.json
+          
+          curl -X POST "${{ inputs.backend_url }}/dashboard/results" \
+            -H "bypass-tunnel-reminder: true" \
+            -F "run_id=${{ github.run_id }}" \
+            -F "repo=${{ github.repository }}" \
+            -F "tool=odozi_visitors" \
+            -F "file=@odozi_report.json"
           echo "=== OUTPUT_END ==="
+
+
