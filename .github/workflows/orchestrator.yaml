@@ -6,9 +6,10 @@ on:
         required: true
         type: string # Example: '["pytest", "ruff", "bandit", "odozi_visitors"]'
       backend_url:
-        description: 'https://angry-views-relate.loca.lt'
+        description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
-        default: 'https://your-production-api.com' # Fallback to prod default
+        type: string
+        default: 'https://fluffy-cougars-mate.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
