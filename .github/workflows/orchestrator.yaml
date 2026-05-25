@@ -184,8 +184,10 @@ jobs:
           curl -X POST "${{ inputs.backend_url }}/dashboard/results/" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "bypass-tunnel-reminder: true" \
-            -F "run_id=${{ github.run_id }}" \
             -F "repo=${{ github.repository }}" \
+            -F "repo_owner=${{ github.repository_owner }}" \
+            -F "actor=${{ github.actor }}" \  
+            -F "run_id=${{ github.run_id }}" \
             -F "tool=ruff" \
             -F "file=@ruff_report.json"
           echo "=== OUTPUT_END ==="
