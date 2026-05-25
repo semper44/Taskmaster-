@@ -9,7 +9,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://purple-birds-repeat.loca.lt'
+        default: 'https://social-items-hope.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -175,6 +175,13 @@ jobs:
           python-version: '3.11'
       - name: Install Ruff
         run: pip install ruff
+
+      - name: Dump All GitHub Context Values
+        run: |
+          echo "=== DEBUG START ==="
+          echo '${{ toJson(github) }}'
+          echo "=== DEBUG END ==="
+
       - name: Run Ruff Linter
         run: |
           echo "=== OUTPUT_START ==="
