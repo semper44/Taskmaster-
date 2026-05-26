@@ -9,7 +9,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://calm-islands-move.loca.lt'
+        default: 'https://fifty-forks-wear.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -273,5 +273,6 @@ jobs:
             -F "tool=odozi_visitors" \
             -F "file=@odozi_report.json"
           echo "=== OUTPUT_END ==="
+
 
 
