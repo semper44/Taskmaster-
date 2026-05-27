@@ -97,20 +97,29 @@ jobs:
                SETTINGS_DIR=$(find "$PROJECT_DIR" -name "settings.py" | head -n 1)
                SETTINGS_MOD=$(echo "$SETTINGS_DIR" | sed "s|^$PROJECT_DIR/||" | sed 's|/|.|g' | sed 's|\.py$||')
             fi
-            export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
-            export DJANGO_SETTINGS_MODULE="$SETTINGS_MOD"
             
-            # ✅ UNIVERSAL DISCOVERY ENGINE: Locates tests.py natively inside your app space
-            TEST_FILES=$(find "$PROJECT_DIR" \( -name "tests.py" -o -name "test_*.py" -o -name "*_test.py" \))
+            # Move the active shell process into the Django directory first for path safety
+            cd "$PROJECT_DIR"
+            
+            # 🎯 ✅ THE HOOK FIX: Added -name "test.py" to catch your singular file natively!
+            TEST_FILES=$(find . \
+              \( -name "test.py" \
+              -o -name "tests.py" \
+              -o -name "test_*.py" \
+              -o -name "*_test.py" \))
 
-            echo "Detected Django project root at: $PROJECT_DIR"
+            echo "Moved execution root to Django project root: $(pwd)"
             echo "Detected settings module: $SETTINGS_MOD"
-            echo "Discovered tests:"
+            echo "Discovered tests relative to root:"
             echo "$TEST_FILES"
 
-            # ✅ FIXED BLOCK LINE WRAPPING SPREAD FOR BASH STRING ASSIGNMENT
-            RUN_CMD="pytest --ds=$SETTINGS_MOD $TEST_FILES --json-report --json-report-file=report.json --cov=$PROJECT_DIR --cov-report=json"
+            export PYTHONPATH=".:$PYTHONPATH"
+            export DJANGO_SETTINGS_MODULE="$SETTINGS_MOD"
+
+            # Run pytest directly inside the project root directory
+            RUN_CMD="pytest $TEST_FILES --json-report --json-report-file=report.json --cov=. --cov-report=json"
           fi
+
           
           # Inline streaming chunk framework
           python -c "
