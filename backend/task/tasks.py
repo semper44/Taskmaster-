@@ -9,7 +9,7 @@ from rest_framework import status
 from task.models import Tasks
 
 
-class CreateTaskTests(APITestCase):
+class CreateTask(APITestCase):
 
     def test_create_task_successfully(self):
         payload = {
@@ -26,6 +26,7 @@ class CreateTaskTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Tasks.objects.count(), 1)
+
 
     def test_invalid_expiry_date_returns_400(self):
         payload = {
