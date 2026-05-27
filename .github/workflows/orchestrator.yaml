@@ -11,7 +11,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://tiny-tables-study.loca.lt'
+        default: 'https://spotty-meals-watch.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -68,32 +68,36 @@ jobs:
           ENV_KEYS_INPUT: ${{ inputs.env_keys_list }}
         run: |
           echo "=== OUTPUT_START ==="
-           # =========================================================================
-          # 🎯 AUTOMATED DYNAMIC VARIABLE INJECTOR (With Echo Verification)
+          # =========================================================================
+          # 🎯 AUTOMATED DYNAMIC VARIABLE INJECTOR (Fixed Main Process Scope)
           # =========================================================================
           echo "🔍 VERIFICATION: Checking variable payload request..."
           echo "Requested from Django DB: $ENV_KEYS_INPUT"
           
-          # Parse the names list string natively using jq and loop through them line by line
-          echo "$ENV_KEYS_INPUT" | jq -r '.[]' | while read -r KEY_NAME; do
+          # ✅ THE SENIOR ARCHITECTURE FIX: Using 'done <<< ...' forces Bash to 
+          # run this loop inside the main process, making exports permanent!
+          while read -r KEY_NAME; do
             if [ -n "$KEY_NAME" ] && [ "$KEY_NAME" != "null" ]; then
               
-              # Extract the matching secret value securely directly out of the JSON secrets context block
+              # Extract value from secrets context block
               SECRET_VALUE=$(echo "$SECRETS_CONTEXT" | jq -r --arg key "$KEY_NAME" '.[$key]')
               
               if [ "$SECRET_VALUE" != "null" ] && [ -n "$SECRET_VALUE" ]; then
-                # 🚀 WRITE TO GLOBAL ENVIROMENT: Sets the value dynamically for the runner process
+                # Append to global file AND export to active parent shell process instantly
                 echo "$KEY_NAME=$SECRET_VALUE" >> $GITHUB_ENV
                 export "$KEY_NAME=$SECRET_VALUE"
                 
-                # ✅ ECHO PROOF: Confirms the environment injection went through successfully!
                 echo "🚀 DYNAMIC INJECTION SUCCESS: Loaded environment variable: $KEY_NAME"
               else
-                # ❌ ERROR PROOF: Flags if the key name is missing inside your GitHub settings panel
-                echo "❌ DYNAMIC INJECTION FAILURE: Variable name '$KEY_NAME' exists in your Django DB, but is missing from your GitHub Repository Actions Secrets vault!"
+                echo "❌ DYNAMIC INJECTION FAILURE: Variable name '$KEY_NAME' is missing from GitHub Secrets vault!"
               fi
             fi
-          done
+          done <<< "$(echo "$ENV_KEYS_INPUT" | jq -r '.[]')"
+
+          # =========================================================================
+          # 🐍 RUN DYNAMIC PROJECT DISCOVERY & TEST COMMAND
+          # =========================================================================
+
            # =========================================================================
           # 🐍 RUN DYNAMIC PROJECT DISCOVERY & TEST COMMAND
           # =========================================================================
