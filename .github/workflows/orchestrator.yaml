@@ -11,7 +11,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://slick-geckos-rush.loca.lt'
+        default: 'https://all-turtles-bathe.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -113,7 +113,21 @@ jobs:
             fi
             export PYTHONPATH="$PROJECT_DIR:$PYTHONPATH"
             export DJANGO_SETTINGS_MODULE="$SETTINGS_MOD"
-            RUN_CMD="pytest $PROJECT_DIR --json-report --json-report-file=report.json --cov=$PROJECT_DIR --cov-report=json"
+            TEST_FILES=$(find "$PROJECT_DIR" \
+              \( -name "tests.py" \
+              -o -name "test_*.py" \
+              -o -name "*_test.py" \))
+
+            echo "Detected Django project root at: $PROJECT_DIR"
+            echo "Detected settings module: $SETTINGS_MOD"
+            echo "Discovered tests:"
+            echo "$TEST_FILES"
+
+            RUN_CMD="pytest --ds=$SETTINGS_MOD $TEST_FILES \
+              --json-report \
+              --json-report-file=report.json \
+              --cov=$PROJECT_DIR \
+              --cov-report=json"
           fi
           
           # Inline streaming chunk framework
@@ -171,6 +185,7 @@ jobs:
               -F "file=@report.json"
           fi
           exit ${{ env.TEST_EXIT_CODE }}
+
 
   # =========================================================================
   # JOB 2: RUFF RUNNER
@@ -259,3 +274,4 @@ jobs:
             -F "run_id=${{ github.run_id }}" \
             -F "tool=odozi_visitors" \
             -F "file=@odozi_report.json"
+
