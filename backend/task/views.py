@@ -333,8 +333,8 @@ def post_user_checkout(request):
 def process_payment_records():
     print("Testing pipeline logic...")
 
-# Intentional syntax crash simulation
-def simulate_crash()
-    print("Missing a colon after the function definition!"
+# # Intentional syntax crash simulation
+# def simulate_crash()
+#     print("Missing a colon after the function definition!"
 
 
