@@ -11,7 +11,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://twelve-berries-send.loca.lt'
+        default: 'https://bumpy-taxis-sneeze.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -162,7 +162,7 @@ jobs:
           for line in sys.stdin:
               sys.stdout.write(line)
               buffer.append(line.strip())
-              if len(buffer) >= 20 or (time.time() - last_flush) > 2.0: flush()
+              if len(buffer) >= 200 or (time.time() - last_flush) > 10.0: flush()
           
           if len(buffer) > 0:
               flush()
