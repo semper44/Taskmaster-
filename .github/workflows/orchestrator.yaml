@@ -11,7 +11,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://sour-areas-exist.loca.lt'
+        default: 'https://twelve-berries-send.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -131,6 +131,7 @@ jobs:
           import sys, urllib.request, json, time, os
           buffer = []
           last_flush = time.time()
+          flush_count = 0
           url = '${{ inputs.backend_url }}/dashboard/results/'
           token = os.environ.get('RUNNER_AUTH_TOKEN', '')
           
