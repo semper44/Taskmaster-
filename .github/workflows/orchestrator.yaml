@@ -11,7 +11,7 @@ on:
         description: 'The API target endpoint (Use Ngrok/LocalTunnel for local testing)'
         required: true
         type: string
-        default: 'https://salty-worms-follow.loca.lt'
+        default: 'https://full-snakes-spend.loca.lt'
       custom_script_payload:
         description: 'Compiled OdoziVisitor class code and file walker'
         required: false
@@ -121,6 +121,11 @@ jobs:
           fi
 
           
+          echo "================================================"
+          echo "STARTING PYTEST"
+          echo "RUN_ID=${{ github.run_id }}"
+          echo "TIME=$(date)"
+          echo "================================================"
           # Inline streaming chunk framework
           python -c "
           import sys, urllib.request, json, time, os
@@ -136,7 +141,14 @@ jobs:
           }
           
           def flush():
-              global buffer, last_flush
+              global buffer, last_flush, flush_count
+              flush_count += 1
+              print(
+                  f"FLUSH #{flush_count} "
+                  f"lines={len(buffer)} "
+                  f"chars={sum(len(x) for x in buffer)}",
+                  flush=True
+              )
               if not buffer: return
               payload = {
                   'run_id': '${{ github.run_id }}', 
@@ -160,6 +172,15 @@ jobs:
               flush()
           " < <($RUN_CMD 2>&1)
           echo "TEST_EXIT_CODE=${PIPESTATUS}" >> $GITHUB_ENV
+          PYTEST_EXIT=${PIPESTATUS[0]}
+
+          echo "================================================"
+          echo "PYTEST FINISHED"
+          echo "EXIT=$PYTEST_EXIT"
+          echo "TIME=$(date)"
+          echo "================================================"
+
+          echo "TEST_EXIT_CODE=$PYTEST_EXIT" >> $GITHUB_ENV
 
       - name: Send Final Pytest Structured Report
         if: always()
