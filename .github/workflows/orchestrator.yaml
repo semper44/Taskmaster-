@@ -143,12 +143,7 @@ jobs:
           def flush():
               global buffer, last_flush, flush_count
               flush_count += 1
-              print(
-                  f"FLUSH #{flush_count} "
-                  f"lines={len(buffer)} "
-                  f"chars={sum(len(x) for x in buffer)}"
-                  flush=True
-              )
+              print(f"FLUSH {flush_count} lines={len(buffer)} chars={sum(len(x) for x in buffer)}", flush=True)
               if not buffer: return
               payload = {
                   'run_id': '${{ github.run_id }}', 
