@@ -162,7 +162,7 @@ jobs:
           for line in sys.stdin:
               sys.stdout.write(line)
               buffer.append(line.strip())
-              if len(buffer) >= 200 or (time.time() - last_flush) > 10.0: flush()
+              if len(buffer) >= 20 or (time.time() - last_flush) > 2.0: flush()
           
           if len(buffer) > 0:
               flush()
