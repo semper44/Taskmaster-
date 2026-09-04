@@ -313,6 +313,7 @@ jobs:
             base64 -d > odozi_runner.py
 
           python odozi_runner.py > odozi_report.json 2>&1 || true
+          cat odozi_report.json
 
       - name: Send Odozi Report
         if: always()
