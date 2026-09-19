@@ -1,9 +1,7 @@
-// config.js
 const ENV = {
-    // API_URL: 'https://taskmaster-xs75.onrender.com',
-    API_URL: 'http://127.0.0.1:8000'
-    // API_URL: 'http://127.0.0.1:50264/'
-    // API_URL: 'http://34.228.65.76:8000/'
-    
-  };
-  
+    API_URL:
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1'
+            ? 'http://127.0.0.1:8000'
+            : 'https://taskmaster-xs75.onrender.com'
+};
