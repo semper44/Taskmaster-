@@ -1,6 +1,4 @@
 $(document).ready(function() {
-    console.log(ENV.API_URL) //in config.js
-    alert(ENV.API_URL) //in config.js
     let createModal =$('#create-modal')
     let aiChatModal =$('#ai-chat-modal')
     let individualTaskModal =$('#individual-task-modal')
