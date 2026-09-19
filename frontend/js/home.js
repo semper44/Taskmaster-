@@ -1,10 +1,12 @@
 $(document).ready(function() {
+    console.log(ENV.API_URL) //in config.js
+    alert(ENV.API_URL) //in config.js
     let createModal =$('#create-modal')
     let aiChatModal =$('#ai-chat-modal')
     let individualTaskModal =$('#individual-task-modal')
     let updateModal =$('#update-modal')
     let images = ["images/15_Q0rCeTd.jpg", "images/768.png", "images/cover.jpg", "images/IMG_nMnY6QO.jpg", "images/R_1.jpg", "images/wp.jpg"]
-    let centralData;
+    let centralData = [];
     let globalTr;
     let globalClickedTaskOptions;
     let globalName;
@@ -13,6 +15,7 @@ $(document).ready(function() {
     let firstTbody = $('#first-tbody')
     let searchResultsOnly = $('.search-body-only ')
     let p = $("<p>").addClass("font-xl text-red-600 text-center mt-8").text("Nothing found")
+
 
 
 
@@ -295,17 +298,31 @@ $(document).ready(function() {
     
                 let errorMessages = xhr.responseJSON; // Capture error messages
     
-                // Display each error message dynamically
-                for (const [field, message] of Object.entries(errorMessages)) {
-                    Toastify({
-                        text: `${field}: ${message}`,
+                if (errorMessages && typeof errorMessages === "object") {
+                    // Display each error message dynamically
+                    for (const [field, message] of Object.entries(errorMessages)) {
+                        Toastify({
+                            text: `${field}: ${message}`,
+                            duration: 5000,
+                            newWindow: true,
+                            gravity: "top",
+                            position: "right",
+                            stopOnFocus: true,
+                            style: {
+                                background: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red gradient for errors
+                            },
+                        }).showToast();
+                    }
+                }else{
+                     Toastify({
+                        text: error || "Something went wrong while creating the task.",
                         duration: 5000,
                         newWindow: true,
                         gravity: "top",
                         position: "right",
                         stopOnFocus: true,
                         style: {
-                            background: "linear-gradient(to right, #ff5f6d, #ffc371)", // Red gradient for errors
+                            background: "linear-gradient(to right, #ff5f6d, #ffc371)",
                         },
                     }).showToast();
                 }
