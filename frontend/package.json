@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx tailwindcss -i ./styles/style.css -o ./styles/output.css --watch",
     "build": "npx tailwindcss -i ./styles/style.css -o ./styles/output.css",
-    "start": "serve -s . -l 3000",
+    "start": "serve . -l 3000 -c serve.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

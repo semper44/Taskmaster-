@@ -1,9 +1,9 @@
-{
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/home.html",
-      "permanent": false
-    }
-  ]
-}
+// {
+//   "redirects": [
+//     {
+//       "source": "/",
+//       "destination": "/home.html",
+//       "permanent": false
+//     }
+//   ]
+// }
