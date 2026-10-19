@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskmaster-config
+data:
+  DJANGO_SETTINGS_MODULE: "root.settings"
+  DEBUG: "True"
+  ALLOWED_HOSTS: "*"
+  PYTHONUNBUFFERED: "1"
