@@ -18,12 +18,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.http import JsonResponse
+
+def health_check(request):
+    return JsonResponse({"status": "healthy", "service": "taskmaster-backend"})
 
 urlpatterns = [
+    path('', health_check, name='health_check'),
+    path('healthz/', health_check, name='healthz'),
     path('admin/', admin.site.urls),
     path('tasks/', include("task.urls")),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

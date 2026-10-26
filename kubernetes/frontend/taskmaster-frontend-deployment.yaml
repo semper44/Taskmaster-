@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taskmaster-frontend
+  namespace: taskmaster
+  labels:
+    app: taskmaster-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: taskmaster-frontend
+  template:
+    metadata:
+      labels:
+        app: taskmaster-frontend
+    spec:
+      containers:
+        - name: taskmaster-frontend
+          image: taskmaster-front:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 20

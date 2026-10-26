@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: taskmaster-migration-job
+  namespace: taskmaster
+  labels:
+    app: taskmaster-migration
+spec:
+  # Automatically clean up the completed Job and Pod after 120 seconds (optional)
+  ttlSecondsAfterFinished: 120
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: taskmaster-migration
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: taskmaster-migration
+          image: semper44/taskmaster:latest
+          imagePullPolicy: IfNotPresent
+          # You can chain multiple commands using /bin/sh -c with '&&'
+          command:
+            - /bin/sh
+            - -c
+            - |
+              python manage.py migrate
+          envFrom:
+            - configMapRef:
+                name: taskmaster-config
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: taskmaster-backend-secrets
+                  key: DJANGO_SECRET_KEY
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: taskmaster-backend-secrets
+                  key: DATABASE_URL
+            - name: CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: taskmaster-backend-secrets
+                  key: CLOUD_NAME
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: taskmaster-backend-secrets
+                  key: API_KEY
+            - name: API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: taskmaster-backend-secrets
+                  key: API_SECRET
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: taskmaster-backend-secrets
+                  key: GEMINI_API_KEY

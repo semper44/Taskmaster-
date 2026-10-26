@@ -31,12 +31,12 @@ RUN apt-get update && apt-get install -y \
 COPY backend/requirements.txt .
 RUN pip install --user -r requirements.txt
 
-# Stage 2: final image (clean)
+
 FROM python:3.12-slim
 
 WORKDIR /app
 
-# Copy installed packages only
+# Copying installed packages only
 COPY --from=builder /root/.local /root/.local
 
 COPY backend/ .
