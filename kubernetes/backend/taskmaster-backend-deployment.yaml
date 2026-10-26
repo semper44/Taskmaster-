@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: taskmaster-backend
-          image: semper44/taskmaster:latest 
+          image: taskmaster-backend:latest 
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
